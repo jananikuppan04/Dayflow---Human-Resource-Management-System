@@ -80,7 +80,7 @@ function MainAppLayout() {
           <Routes>
             <Route path="/dashboard" element={<EmployeeDashboard currentRole={currentRole} />} />
             <Route path="/profile" element={<SalaryInfoPage currentRole={currentRole} />} />
-            <Route path="/employees" element={<EmployeesPage />} />
+            <Route path="/employees" element={currentRole === 'ADMIN' ? <EmployeesPage /> : <Navigate to="/dashboard" replace />} />
             <Route path="/attendance" element={<AttendancePage />} />
             <Route path="/time-off" element={<TimeOffPage currentRole={currentRole} />} />
             <Route path="/payroll" element={<PayrollPage currentRole={currentRole} />} />

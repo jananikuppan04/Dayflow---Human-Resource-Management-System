@@ -53,16 +53,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
     navigate('/login');
   };
 
-  const navItems = [
+  const isAdmin = user?.role === 'admin';
+
+  const allNavItems = [
     { id: 'Dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'My Profile', label: 'My Profile', icon: User },
-    { id: 'Employees', label: 'Employees', icon: Users },
+    { id: 'Employees', label: 'Employees', icon: Users, adminOnly: true },
     { id: 'Attendance', label: 'Attendance', icon: Clock },
     { id: 'Time Off', label: 'Time Off', icon: Calendar },
     { id: 'Payroll', label: 'Payroll', icon: Wallet },
     { id: 'Reports', label: 'Reports', icon: FileBarChart },
     { id: 'Settings', label: 'Settings', icon: Settings },
   ];
+
+  const navItems = allNavItems.filter((item) => !item.adminOnly || isAdmin);
 
   const sidebarContent = (
     <div className="flex flex-col h-full bg-[#0F172A] text-slate-300 w-64 border-r border-slate-800 select-none relative">
@@ -126,11 +130,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
         >
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-[#714B67] text-white font-semibold flex items-center justify-center text-sm shadow-sm ring-2 ring-purple-500/30">
-              JD
+              {isAdmin ? 'SA' : 'JD'}
             </div>
             <div className="overflow-hidden text-left">
-              <div className="text-sm font-semibold text-white truncate">Janani Devi</div>
-              <div className="text-xs text-slate-400 truncate">Software Engineer</div>
+              <div className="text-sm font-semibold text-white truncate">
+                {isAdmin ? 'System Admin' : 'Janani Devi'}
+              </div>
+              <div className="text-xs text-slate-400 truncate">
+                {isAdmin ? 'HR Administrator' : 'Software Engineer'}
+              </div>
             </div>
           </div>
           {isUserMenuOpen ? (
@@ -144,8 +152,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {isUserMenuOpen && (
           <div className="absolute bottom-full left-4 right-4 mb-2 bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 p-2 text-xs space-y-1 animate-in zoom-in-95 duration-150 z-50">
             <div className="px-3 py-2 border-b border-slate-700/80">
-              <span className="font-bold text-white block truncate">Janani Devi</span>
-              <span className="text-[11px] text-slate-400 block truncate">janani.dev@email.com</span>
+              <span className="font-bold text-white block truncate">
+                {isAdmin ? 'System Admin' : 'Janani Devi'}
+              </span>
+              <span className="text-[11px] text-slate-400 block truncate">
+                {user?.email || (isAdmin ? 'admin@dayflow.com' : 'john.doe@example.com')}
+              </span>
             </div>
 
             <button

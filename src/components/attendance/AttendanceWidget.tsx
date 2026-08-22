@@ -13,40 +13,40 @@ export const AttendanceWidget = () => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    if (user?.employeeId) {
-      loadAttendance();
-    }
+    loadAttendance();
   }, [user]);
 
   const loadAttendance = async () => {
-    if (!user?.employeeId) return;
+    const empId = user?.employeeId || (user?.role === 'admin' ? 'e-admin' : 'e1');
     setStatus('loading');
     try {
-      const emp = await mockApi.getCurrentEmployee(user.employeeId);
+      const emp = await mockApi.getCurrentEmployee(empId);
       setEmployee(emp);
       const today = new Date().toISOString().split('T')[0];
-      const statuses = await mockApi.getAttendanceStatus([user.employeeId], today);
+      const statuses = await mockApi.getAttendanceStatus([empId], today);
       
-      if (statuses[user.employeeId] === 'leave') {
+      if (statuses[empId] === 'leave' || (emp?.id && statuses[emp.id] === 'leave')) {
         setStatus('leave');
         return;
       }
       
-      const todayRecord = await mockApi.getTodayAttendance(user.employeeId);
+      const todayRecord = await mockApi.getTodayAttendance(empId);
       setRecord(todayRecord);
       setStatus('idle');
-    } catch (err) {
+    } catch (err: any) {
+      console.error('Error loading attendance:', err);
       setStatus('error');
-      setErrorMsg('Failed to load attendance');
+      setErrorMsg(err?.message || 'Failed to load attendance');
     }
   };
 
   const handleCheckIn = async () => {
-    if (!user?.employeeId || isProcessing) return;
+    const empId = user?.employeeId || (user?.role === 'admin' ? 'e-admin' : 'e1');
+    if (isProcessing) return;
     setIsProcessing(true);
     setErrorMsg('');
     try {
-      const newRecord = await mockApi.checkIn(user.employeeId);
+      const newRecord = await mockApi.checkIn(empId);
       setRecord(newRecord);
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to check in');
@@ -56,11 +56,12 @@ export const AttendanceWidget = () => {
   };
 
   const handleCheckOut = async () => {
-    if (!user?.employeeId || isProcessing) return;
+    const empId = user?.employeeId || (user?.role === 'admin' ? 'e-admin' : 'e1');
+    if (isProcessing) return;
     setIsProcessing(true);
     setErrorMsg('');
     try {
-      const updatedRecord = await mockApi.checkOut(user.employeeId);
+      const updatedRecord = await mockApi.checkOut(empId);
       setRecord(updatedRecord);
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to check out');

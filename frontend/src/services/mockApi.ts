@@ -138,6 +138,25 @@ let mockAttendanceRecords: AttendanceRecord[] = [
   }
 ];
 
+// Helper function to resolve various employee ID formats (e.g. 'e-admin', 'ADMIN001', 'e1', 'EMP-1001', etc.) to actual employee object ID
+export const resolveEmployeeId = (employeeId: string): string => {
+  if (!employeeId) return 'e-admin';
+  const trimmed = employeeId.trim();
+  const empById = mockEmployees.find(e => e.id === trimmed);
+  if (empById) return empById.id;
+
+  const empByLoginId = mockEmployees.find(e => e.loginId === trimmed);
+  if (empByLoginId) return empByLoginId.id;
+
+  const empByEmail = mockEmployees.find(e => e.email.toLowerCase() === trimmed.toLowerCase());
+  if (empByEmail) return empByEmail.id;
+
+  if (trimmed === 'ADMIN001' || trimmed.toLowerCase().includes('admin')) return 'e-admin';
+  if (trimmed === 'EMP-1001' || trimmed === 'OIJODO20220001') return 'e1';
+
+  return mockEmployees[0]?.id || 'e-admin';
+};
+
 export const mockApi = {
   // REQUIRES BACKEND: Replace with POST /api/auth/login
   login: async (email: string, password: string): Promise<User> => {
@@ -157,7 +176,8 @@ export const mockApi = {
   getCurrentEmployee: async (employeeId: string): Promise<Employee> => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const emp = mockEmployees.find(e => e.id === employeeId);
+        const resolvedId = resolveEmployeeId(employeeId);
+        const emp = mockEmployees.find(e => e.id === resolvedId);
         if (emp) resolve(emp);
         else reject(new Error('Employee not found'));
       }, 300);
@@ -174,27 +194,31 @@ export const mockApi = {
       setTimeout(() => {
         const statuses: Record<string, 'present' | 'leave' | 'absent'> = {};
         
-        employeeIds.forEach(empId => {
+        employeeIds.forEach(rawEmpId => {
+          const empId = resolveEmployeeId(rawEmpId);
           // Check if on leave
           const hasLeave = mockTimeOffs.some(
-            t => t.employeeId === empId && t.status === 'approved' && t.startDate <= date && t.endDate >= date
+            t => resolveEmployeeId(t.employeeId) === empId && t.status === 'approved' && t.startDate <= date && t.endDate >= date
           );
           
           if (hasLeave) {
+            statuses[rawEmpId] = 'leave';
             statuses[empId] = 'leave';
             return;
           }
 
           // Check if checked in
           const hasAttendance = mockAttendanceRecords.some(
-            a => a.employeeId === empId && a.date === date && a.checkIn !== null
+            a => resolveEmployeeId(a.employeeId) === empId && a.date === date && a.checkIn !== null
           );
 
           if (hasAttendance) {
+            statuses[rawEmpId] = 'present';
             statuses[empId] = 'present';
             return;
           }
 
+          statuses[rawEmpId] = 'absent';
           statuses[empId] = 'absent';
         });
 
@@ -207,8 +231,9 @@ export const mockApi = {
   getTodayAttendance: async (employeeId: string) => {
     return new Promise<AttendanceRecord | null>((resolve) => {
       setTimeout(() => {
+        const resolvedId = resolveEmployeeId(employeeId);
         const today = new Date().toISOString().split('T')[0];
-        const record = mockAttendanceRecords.find(a => a.employeeId === employeeId && a.date === today);
+        const record = mockAttendanceRecords.find(a => resolveEmployeeId(a.employeeId) === resolvedId && a.date === today);
         resolve(record || null);
       }, 500);
     });
@@ -219,14 +244,14 @@ export const mockApi = {
     return new Promise<{record: AttendanceRecord | null, employee: Employee}[]>((resolve) => {
       setTimeout(() => {
         const results = mockEmployees.map(emp => {
-          const record = mockAttendanceRecords.find(a => a.employeeId === emp.id && a.date === date);
+          const record = mockAttendanceRecords.find(a => resolveEmployeeId(a.employeeId) === emp.id && a.date === date);
           
           let effectiveRecord = record || null;
           
           // If no record, check if they are on leave
           if (!effectiveRecord) {
             const hasLeave = mockTimeOffs.some(
-              t => t.employeeId === emp.id && t.status === 'approved' && t.startDate <= date && t.endDate >= date
+              t => resolveEmployeeId(t.employeeId) === emp.id && t.status === 'approved' && t.startDate <= date && t.endDate >= date
             );
             if (hasLeave) {
               effectiveRecord = {
@@ -267,12 +292,13 @@ export const mockApi = {
   getEmployeeAttendanceHistory: async (employeeId: string, monthPrefix: string) => {
     return new Promise<{ records: AttendanceRecord[], stats: { present: number, leaves: number, total: number } }>((resolve) => {
       setTimeout(() => {
-        const records = mockAttendanceRecords.filter(a => a.employeeId === employeeId && a.date.startsWith(monthPrefix));
+        const resolvedId = resolveEmployeeId(employeeId);
+        const records = mockAttendanceRecords.filter(a => resolveEmployeeId(a.employeeId) === resolvedId && a.date.startsWith(monthPrefix));
         
         // Sort descending by date
         records.sort((a, b) => b.date.localeCompare(a.date));
 
-        const leaves = mockTimeOffs.filter(t => t.employeeId === employeeId && t.status === 'approved' && t.startDate.startsWith(monthPrefix)).length;
+        const leaves = mockTimeOffs.filter(t => resolveEmployeeId(t.employeeId) === resolvedId && t.status === 'approved' && t.startDate.startsWith(monthPrefix)).length;
         const present = records.filter(r => r.status === 'present').length;
         
         resolve({
@@ -291,11 +317,12 @@ export const mockApi = {
   checkIn: async (employeeId: string) => {
     return new Promise<AttendanceRecord>((resolve, reject) => {
       setTimeout(() => {
+        const resolvedId = resolveEmployeeId(employeeId);
         const today = new Date().toISOString().split('T')[0];
         
         // Check if on approved leave
         const hasLeave = mockTimeOffs.some(
-          t => t.employeeId === employeeId && t.status === 'approved' && t.startDate <= today && t.endDate >= today
+          t => resolveEmployeeId(t.employeeId) === resolvedId && t.status === 'approved' && t.startDate <= today && t.endDate >= today
         );
         
         if (hasLeave) {
@@ -304,7 +331,7 @@ export const mockApi = {
         }
 
         // Check if already checked in
-        const existingRecord = mockAttendanceRecords.find(a => a.employeeId === employeeId && a.date === today);
+        const existingRecord = mockAttendanceRecords.find(a => resolveEmployeeId(a.employeeId) === resolvedId && a.date === today);
         if (existingRecord && existingRecord.checkIn) {
           reject(new Error('Already checked in today.'));
           return;
@@ -312,7 +339,7 @@ export const mockApi = {
 
         const newRecord: AttendanceRecord = {
           id: `a${Date.now()}`,
-          employeeId,
+          employeeId: resolvedId,
           date: today,
           checkIn: new Date().toISOString(),
           checkOut: null,
@@ -328,8 +355,9 @@ export const mockApi = {
   checkOut: async (employeeId: string) => {
     return new Promise<AttendanceRecord>((resolve, reject) => {
       setTimeout(() => {
+        const resolvedId = resolveEmployeeId(employeeId);
         const today = new Date().toISOString().split('T')[0];
-        const recordIndex = mockAttendanceRecords.findIndex(a => a.employeeId === employeeId && a.date === today);
+        const recordIndex = mockAttendanceRecords.findIndex(a => resolveEmployeeId(a.employeeId) === resolvedId && a.date === today);
         
         if (recordIndex === -1 || !mockAttendanceRecords[recordIndex].checkIn) {
           reject(new Error('Cannot check out without checking in first.'));

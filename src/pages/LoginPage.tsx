@@ -45,10 +45,10 @@ export default function LoginPage() {
       const isAdmin = loginId.toLowerCase().includes('admin');
       
       login({
-        id: isAdmin ? 'u1' : 'emp_1001',
+        id: isAdmin ? 'u-admin' : 'u-john',
         email: loginId,
         role: isAdmin ? 'admin' : 'employee',
-        employeeId: isAdmin ? 'ADMIN001' : 'EMP-1001',
+        employeeId: isAdmin ? 'e-admin' : 'e1',
       });
 
       navigate('/dashboard');
