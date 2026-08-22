@@ -1,354 +1,283 @@
-import { useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
-import PageBackground from '../components/auth/PageBackground'
-import { useToast, ToastContainer } from '../components/auth/Toast'
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useToast, ToastContainer } from '../components/auth/Toast';
+import { Shield, CheckCircle2, LayoutDashboard, Copy, ArrowLeft } from 'lucide-react';
+import { mockApi } from '../services/mockApi';
 
-function EyeIcon({ open }: { open: boolean }) {
-  return open ? (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-    </svg>
-  ) : (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-      <line x1="1" y1="1" x2="23" y2="23"/>
-    </svg>
-  )
-}
-
-function computeLoginId(company: string, firstName: string, lastName: string, year: string) {
-  const code = company.replace(/\s+/g, '').toUpperCase().slice(0, 5) || 'COMP'
-  const fn   = firstName.replace(/\s+/g, '').toUpperCase().slice(0, 2) || 'XX'
-  const ln   = lastName.replace(/\s+/g, '').toUpperCase().slice(0, 2) || 'XX'
-  const yr   = year || new Date().getFullYear().toString()
-  return `${code}${fn}${ln}${yr}0001`
+function computeLoginId(firstName: string, lastName: string, year: string) {
+  const code = 'DAYF';
+  const fn   = firstName.replace(/\s+/g, '').toUpperCase().slice(0, 2).padEnd(2, 'X');
+  const ln   = lastName.replace(/\s+/g, '').toUpperCase().slice(0, 2).padEnd(2, 'X');
+  const yr   = year || new Date().getFullYear().toString();
+  return `${code}${fn}${ln}${yr}0001`;
 }
 
 function generatePassword() {
-  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$'
-  return Array.from({ length: 12 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$';
+  return Array.from({ length: 12 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 }
 
 export default function SignupPage() {
-  const navigate = useNavigate()
-  const { toasts, addToast } = useToast()
-  const fileRef = useRef<HTMLInputElement>(null)
+  const navigate = useNavigate();
+  const { toasts, addToast } = useToast();
 
-  const [drag, setDrag] = useState(false)
-  const [logoFile, setLogoFile] = useState<File | null>(null)
-  const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName]   = useState('');
+  const [email, setEmail]         = useState('');
+  const [phone, setPhone]         = useState('');
+  const [year, setYear]           = useState(new Date().getFullYear().toString());
 
-  const [company, setCompany]     = useState('')
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName]   = useState('')
-  const [email, setEmail]         = useState('')
-  const [phone, setPhone]         = useState('')
-  const [year, setYear]           = useState('')
+  const [tempPassword, setTempPassword] = useState('');
+  const [loading, setLoading]   = useState(false);
+  const [success, setSuccess]   = useState(false);
 
-  const [password]    = useState(generatePassword)
-  const [showPw, setShowPw]       = useState(false)
-  const [showCPw, setShowCPw]     = useState(false)
+  const loginId = computeLoginId(firstName, lastName, year);
+  
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 20 }, (_, i) => currentYear - i);
 
-  const [loading, setLoading]   = useState(false)
-  const [success, setSuccess]   = useState(false)
-
-  const loginId = computeLoginId(company, firstName, lastName, year)
-
-  const currentYear = new Date().getFullYear()
-  const years = Array.from({ length: 20 }, (_, i) => currentYear - i)
-
-  function handleFile(file: File) {
-    if (!file.type.match(/image\/(png|jpeg|jpg)/)) { addToast('Please upload PNG or JPG only.', 'error'); return }
-    if (file.size > 2 * 1024 * 1024) { addToast('File size must be under 2MB.', 'error'); return }
-    setLogoFile(file)
-    const reader = new FileReader()
-    reader.onload = e => setLogoPreview(e.target?.result as string)
-    reader.readAsDataURL(file)
-  }
+  useEffect(() => {
+    setTempPassword(generatePassword());
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!company) { addToast('Company name is required.', 'error'); return }
-    if (!firstName || !lastName) { addToast('Employee name is required.', 'error'); return }
-    if (!email.includes('@')) { addToast('Enter a valid email address.', 'error'); return }
-    if (!phone) { addToast('Phone number is required.', 'error'); return }
-    if (!year) { addToast('Year of joining is required.', 'error'); return }
-    setLoading(true)
-    await new Promise(r => setTimeout(r, 2000))
-    setLoading(false)
-    setSuccess(true)
-    addToast(`Account created! Login ID: ${loginId}`, 'success')
-    setTimeout(() => navigate('/login'), 2500)
+    e.preventDefault();
+    if (!firstName || !lastName) { addToast('Employee name is required.', 'error'); return; }
+    if (!email.includes('@')) { addToast('Enter a valid email address.', 'error'); return; }
+    if (!phone) { addToast('Phone number is required.', 'error'); return; }
+    if (!year) { addToast('Year of joining is required.', 'error'); return; }
+    
+    setLoading(true);
+    try {
+      await mockApi.createEmployee({
+        firstName,
+        lastName,
+        email,
+        mobile: phone,
+        loginId
+      }, tempPassword);
+      setLoading(false);
+      setSuccess(true);
+      addToast(`Employee account created successfully!`, 'success');
+    } catch (err: any) {
+      setLoading(false);
+      addToast(err.message || 'Failed to create account.', 'error');
+    }
   }
 
+  const copyCredentials = () => {
+    navigator.clipboard.writeText(`Login ID: ${loginId}\nEmail: ${email}\nPassword: ${tempPassword}`);
+    addToast('Credentials copied to clipboard!', 'success');
+  };
+
   return (
-    <PageBackground>
+    <div className="flex min-h-screen w-full bg-slate-50">
       <ToastContainer toasts={toasts} />
-
-      {/* Top bar */}
-      <div className="signup-topbar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => navigate('/login')}>
-          <div className="nav-logo-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
+      
+      {/* Left Branding Panel (Hidden on Mobile) */}
+      <div className="hidden lg:flex flex-col justify-between w-[40%] xl:w-[35%] bg-[#211a52] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#322382] to-[#211a52] p-12 text-white shadow-2xl z-10 relative overflow-hidden fixed h-screen">
+        {/* Subtle decorative background pattern */}
+        <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
+        
+        <div className="relative z-10">
+          <button onClick={() => navigate('/employees')} className="flex items-center gap-2 text-[#a4a0cf] hover:text-white transition-colors mb-16">
+            <ArrowLeft className="w-5 h-5" /> Back to Employees
+          </button>
+          
+          <div className="flex items-center gap-3 mb-10">
+            <div className="w-10 h-10 bg-primary-500 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
+              <LayoutDashboard className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-bold text-2xl tracking-tight">Dayflow</span>
           </div>
-          <div className="nav-logo-text">
-            <span className="nav-logo-title">Dayflow</span>
-            <span className="nav-logo-sub">HRM System</span>
-          </div>
-        </div>
-        <button className="signup-back-btn" onClick={() => navigate('/login')}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-          </svg>
-          Back to Sign In
-        </button>
-      </div>
 
-      <div className="signup-content">
-        {/* Hero */}
-        <div className="hero" style={{ marginBottom: 32 }}>
-          <h1 className="hero-title" style={{ fontSize: 'clamp(28px,4vw,44px)' }}>
-            Build your team on <span className="gradient-text">Dayflow.</span>
+          <h1 className="text-4xl font-bold leading-tight mb-4 tracking-tight">
+            Build your team<br/>
+            <span className="text-primary-300">securely.</span>
           </h1>
-          <p className="hero-subtitle">
-            Create a secure employee account and get your workforce connected.
+          <p className="text-[#a4a0cf] text-lg max-w-sm leading-relaxed mb-12 font-medium">
+            Create secure employee accounts and get your workforce connected instantly.
           </p>
-        </div>
 
-        {/* Card */}
-        <div className="signup-card">
-          <div className="card-header" style={{ marginBottom: 24 }}>
-            <div className="card-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-                <line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
-              </svg>
-            </div>
-            <h2 className="card-title">Create Employee Account</h2>
-            <p className="card-subtitle">Enter employee details to create a secure Dayflow account.</p>
-          </div>
-
-          <form onSubmit={handleSubmit} noValidate>
-            {/* Company Info */}
-            <p className="section-label">Company Information</p>
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="companyName">
-                Company Name <span className="required">*</span>
-              </label>
-              <input
-                id="companyName" type="text" className="form-input no-icon"
-                placeholder="Enter company name"
-                value={company} onChange={e => setCompany(e.target.value)}
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Upload Company Logo</label>
-              <div
-                className={`upload-area${drag ? ' drag-over' : ''}`}
-                onDragOver={e => { e.preventDefault(); setDrag(true) }}
-                onDragLeave={() => setDrag(false)}
-                onDrop={e => { e.preventDefault(); setDrag(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f) }}
-                onClick={() => fileRef.current?.click()}
-              >
-                <input
-                  ref={fileRef} type="file" accept="image/png,image/jpeg"
-                  onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }}
-                  style={{ display: 'none' }}
-                />
-                {logoPreview ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-                    <img src={logoPreview} alt="Logo preview" style={{ height: 56, objectFit: 'contain', borderRadius: 8 }} />
-                    <span style={{ fontSize: 12, color: 'var(--gray-400)' }}>{logoFile?.name}</span>
-                  </div>
-                ) : (
-                  <>
-                    <div className="upload-icon">
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
-                        <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
-                      </svg>
-                    </div>
-                    <p className="upload-title">Drop your logo here</p>
-                    <p className="upload-sub">or <span>browse from your computer</span></p>
-                    <p className="upload-sub" style={{ marginTop: 4 }}>PNG, JPG · Max 2MB</p>
-                  </>
-                )}
+          <div className="space-y-6">
+            <div className="flex gap-4">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full border border-[#43389a] bg-[#2a2266] flex items-center justify-center">
+                <Shield className="w-5 h-5 text-primary-300" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-white mb-1">HR Protected Tool</h3>
+                <p className="text-sm text-[#8c86bc] leading-relaxed max-w-[240px]">
+                  Only administrators can access this creation portal.
+                </p>
               </div>
             </div>
-
-            <div className="card-divider" />
-
-            {/* Employee Info */}
-            <p className="section-label">Employee Information</p>
-
-            <div className="form-grid" style={{ marginBottom: 14 }}>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" htmlFor="firstName">First Name <span className="required">*</span></label>
-                <input id="firstName" type="text" className="form-input no-icon" placeholder="First name"
-                  value={firstName} onChange={e => setFirstName(e.target.value)} />
+            
+            <div className="flex gap-4">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full border border-[#43389a] bg-[#2a2266] flex items-center justify-center">
+                <CheckCircle2 className="w-5 h-5 text-primary-300" />
               </div>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" htmlFor="lastName">Last Name <span className="required">*</span></label>
-                <input id="lastName" type="text" className="form-input no-icon" placeholder="Last name"
-                  value={lastName} onChange={e => setLastName(e.target.value)} />
+              <div>
+                <h3 className="font-semibold text-white mb-1">Automated Security</h3>
+                <p className="text-sm text-[#8c86bc] leading-relaxed max-w-[240px]">
+                  Credentials are generated securely and reset on first login.
+                </p>
               </div>
             </div>
-
-            <div className="form-grid" style={{ marginBottom: 14 }}>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" htmlFor="empEmail">Email <span className="required">*</span></label>
-                <div className="input-wrap">
-                  <span className="input-icon">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
-                    </svg>
-                  </span>
-                  <input id="empEmail" type="email" className="form-input" placeholder="Email address"
-                    value={email} onChange={e => setEmail(e.target.value)} />
-                </div>
-              </div>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" htmlFor="empPhone">Phone <span className="required">*</span></label>
-                <div className="input-wrap">
-                  <span className="input-icon">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.37 2 2 0 0 1 3.6 1.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8 8.09a16 16 0 0 0 7.91 7.91l.86-.86a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-                    </svg>
-                  </span>
-                  <input id="empPhone" type="tel" className="form-input" placeholder="Phone number"
-                    value={phone} onChange={e => setPhone(e.target.value)} />
-                </div>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="yearJoining">Year of Joining <span className="required">*</span></label>
-              <select id="yearJoining" className="form-select" value={year} onChange={e => setYear(e.target.value)}>
-                <option value="">Select year</option>
-                {years.map(y => <option key={y} value={y}>{y}</option>)}
-              </select>
-            </div>
-
-            <div className="card-divider" />
-
-            {/* Credentials */}
-            <p className="section-label">Credentials</p>
-
-            <div className="form-grid" style={{ marginBottom: 14 }}>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Password</label>
-                <div className="input-wrap">
-                  <input type={showPw ? 'text' : 'password'} className="form-input no-icon has-action"
-                    value={password} readOnly style={{ color: 'var(--gray-400)', fontStyle: 'italic', background: 'var(--gray-50)', cursor: 'default' }} />
-                  <button type="button" className="input-action" onClick={() => setShowPw(v => !v)}>
-                    <EyeIcon open={showPw} />
-                  </button>
-                </div>
-              </div>
-              <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Confirm Password</label>
-                <div className="input-wrap">
-                  <input type={showCPw ? 'text' : 'password'} className="form-input no-icon has-action"
-                    value={password} readOnly style={{ color: 'var(--gray-400)', fontStyle: 'italic', background: 'var(--gray-50)', cursor: 'default' }} />
-                  <button type="button" className="input-action" onClick={() => setShowCPw(v => !v)}>
-                    <EyeIcon open={showCPw} />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Login ID panel */}
-            <div className="loginid-panel">
-              <p className="loginid-panel-title">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                </svg>
-                Your Login ID is generated automatically
-              </p>
-              <div className="loginid-formula">
-                {[
-                  { label: 'Company Code', value: company.replace(/\s+/g,'').toUpperCase().slice(0,5) || 'COMP' },
-                  null,
-                  { label: 'First 2 of First', value: firstName.slice(0,2).toUpperCase() || 'XX' },
-                  null,
-                  { label: 'First 2 of Last', value: lastName.slice(0,2).toUpperCase() || 'XX' },
-                  null,
-                  { label: 'Year of Joining', value: year || new Date().getFullYear().toString() },
-                  null,
-                  { label: 'Serial No.', value: '0001' },
-                ].map((item, i) =>
-                  item === null ? (
-                    <span key={i} className="formula-plus">+</span>
-                  ) : (
-                    <div key={i} className="formula-chip">
-                      <div className="formula-chip-label">{item.label}</div>
-                      <div className="formula-chip-value">{item.value}</div>
-                    </div>
-                  )
-                )}
-              </div>
-              <div className="formula-example">
-                {loginId}
-                <div className="formula-example-sub">Example Login ID · Updates live as you type</div>
-              </div>
-            </div>
-
-            {/* Password info */}
-            <div className="password-info" style={{ marginTop: 14 }}>
-              <div className="pw-info-row">
-                <div className="pw-info-item">
-                  <div className="pw-info-badge">
-                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                    </svg>
-                    Auto-generated
-                  </div>
-                  <div className="pw-info-title">Secure temporary password</div>
-                  <div className="pw-info-desc">System generates the initial password for the employee's first login.</div>
-                </div>
-                <div className="pw-info-item">
-                  <div className="pw-info-badge">
-                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-                    </svg>
-                    First Login
-                  </div>
-                  <div className="pw-info-title">Change password after first login</div>
-                  <div className="pw-info-desc">Employee can change the generated password after logging in for the first time.</div>
-                </div>
-              </div>
-            </div>
-
-            <div style={{ marginTop: 24 }}>
-              <button id="create-account-btn" type="submit" className="btn-primary" disabled={loading || success}>
-                {loading ? (
-                  <><span className="spinner" /> Creating Account…</>
-                ) : success ? (
-                  <>✓ Account Created!</>
-                ) : (
-                  <>Create Employee Account <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></>
-                )}
-              </button>
-            </div>
-          </form>
-
-          <div className="card-divider" />
-          <div className="card-footer">
-            <p>Already have an account?{' '}
-              <a id="goto-signin" onClick={() => navigate('/login')} role="button">Sign In →</a>
-            </p>
           </div>
         </div>
 
-        <div style={{ height: 48 }} />
+        <div className="relative z-10 text-xs text-[#706a9c] font-medium">
+          © {new Date().getFullYear()} Dayflow HRMS. All rights reserved.
+        </div>
       </div>
-    </PageBackground>
-  )
+
+      {/* Right Auth Panel */}
+      <div className="flex-1 flex flex-col justify-center px-4 sm:px-8 lg:px-16 bg-slate-50 relative lg:ml-[40%] xl:ml-[35%] py-12 min-h-screen overflow-y-auto">
+        
+        {/* Mobile Logo & Back */}
+        <div className="lg:hidden flex items-center justify-between mb-8 mt-4">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center shadow-md shadow-primary-600/20">
+              <LayoutDashboard className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-bold text-2xl text-slate-900 tracking-tight">Dayflow</span>
+          </div>
+          <button onClick={() => navigate('/employees')} className="text-sm font-semibold text-slate-500">Back</button>
+        </div>
+
+        <div className="w-full max-w-[500px] mx-auto bg-white p-8 sm:p-10 rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
+          {!success ? (
+            <>
+              <div className="text-center mb-8">
+                <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-5 border border-orange-100/50">
+                  <Shield className="w-7 h-7 text-orange-500" />
+                </div>
+                <h2 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">Create Employee</h2>
+                <p className="text-slate-500 text-sm">Enter employee details to generate credentials.</p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-5">
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1.5">First Name</label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all text-slate-800"
+                      value={firstName} onChange={(e) => setFirstName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Last Name</label>
+                    <input
+                      type="text"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all text-slate-800"
+                      value={lastName} onChange={(e) => setLastName(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
+                    <input
+                      type="email"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all text-slate-800"
+                      value={email} onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1.5">Phone</label>
+                    <input
+                      type="tel"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all text-slate-800"
+                      value={phone} onChange={(e) => setPhone(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">Year of Joining</label>
+                  <select 
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all bg-white text-slate-800"
+                    value={year} onChange={(e) => setYear(e.target.value)}
+                  >
+                    {years.map(y => <option key={y} value={y}>{y}</option>)}
+                  </select>
+                </div>
+
+                <div className="bg-slate-50 border border-slate-100 rounded-xl p-5 mt-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-sm font-bold text-slate-700 tracking-tight">Auto-Generated Credentials</h4>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Login ID</span>
+                      <span className="text-sm font-mono font-bold text-primary-700 bg-primary-50 px-2.5 py-1 rounded-md">{loginId}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Temp Password</span>
+                      <span className="text-sm font-mono text-slate-600 bg-white px-2.5 py-1 rounded-md border border-slate-200">
+                        ••••••••••••
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-4 leading-relaxed font-medium">
+                    A temporary password is generated securely. The employee will be required to change it upon their first login.
+                  </p>
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  className="w-full mt-4 bg-gradient-to-r from-primary-600 to-indigo-600 text-white font-semibold py-3.5 rounded-xl hover:shadow-lg hover:shadow-primary-500/25 transition-all active:scale-[0.99] disabled:opacity-70 disabled:active:scale-100"
+                >
+                  {loading ? 'Creating Account...' : 'Create Employee Account'}
+                </button>
+              </form>
+            </>
+          ) : (
+            <div className="text-center">
+              <div className="w-16 h-16 bg-[#f0fdf4] rounded-full flex items-center justify-center mx-auto mb-5 border border-[#dcfce7]">
+                <CheckCircle2 className="w-8 h-8 text-[#166534]" />
+              </div>
+              <h2 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">Account Created!</h2>
+              <p className="text-slate-500 text-sm mb-8">Please securely share these credentials with the employee.</p>
+              
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 text-left mb-8">
+                <div className="mb-4">
+                  <span className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Email / Login ID</span>
+                  <div className="font-mono font-medium text-slate-900 bg-white px-4 py-2.5 rounded-lg border border-slate-200 shadow-sm">
+                    {email} <span className="text-slate-300 mx-2">|</span> {loginId}
+                  </div>
+                </div>
+                <div>
+                  <span className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Temporary Password</span>
+                  <div className="font-mono font-medium text-slate-900 bg-white px-4 py-2.5 rounded-lg border border-slate-200 shadow-sm">
+                    {tempPassword}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <button 
+                  onClick={copyCredentials}
+                  className="flex-1 bg-white border border-slate-200 text-slate-700 font-semibold py-3.5 rounded-xl hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <Copy className="w-4 h-4" /> Copy
+                </button>
+                <button 
+                  onClick={() => navigate('/employees')}
+                  className="flex-1 bg-primary-600 text-white font-semibold py-3.5 rounded-xl hover:bg-primary-700 transition-colors shadow-sm"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }

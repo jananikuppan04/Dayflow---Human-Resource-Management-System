@@ -1,4 +1,4 @@
-import type { Employee, AttendanceRecord, TimeOffRecord, User } from '../types';
+import type { Employee, AttendanceRecord, TimeOffRecord, User, LeaveBalance } from '../types';
 
 // TEMPORARY: Isolated mock data
 const mockAuthUsers: User[] = [
@@ -6,6 +6,19 @@ const mockAuthUsers: User[] = [
   { id: 'u-john', email: 'john.doe@example.com', role: 'employee', employeeId: 'e1' },
   { id: 'u-sarah', email: 'sarah.smith@example.com', role: 'employee', employeeId: 'e2' }
 ];
+
+// Map of email -> password for mock authentication
+const mockPasswords: Record<string, string> = {
+  'admin@dayflow.com': 'password123',
+  'john.doe@example.com': 'password123',
+  'sarah.smith@example.com': 'password123'
+};
+
+const mockPasswordChanged: Record<string, boolean> = {
+  'admin@dayflow.com': true, // admin doesn't need to change
+  'john.doe@example.com': true,
+  'sarah.smith@example.com': true
+};
 
 const mockEmployees: Employee[] = [
   {
@@ -80,14 +93,26 @@ const mockEmployees: Employee[] = [
   },
 ];
 
-const mockTimeOffs: TimeOffRecord[] = [
+let mockTimeOffs: TimeOffRecord[] = [
   {
     id: 't1',
     employeeId: 'e2', // Sarah is on leave today
+    employeeName: 'Sarah Smith',
+    type: 'Paid Time Off',
     startDate: new Date().toISOString().split('T')[0],
     endDate: new Date().toISOString().split('T')[0],
+    duration: 1,
     status: 'approved',
+    remarks: 'Pre-planned vacation day'
   }
+];
+
+let mockLeaveBalances: LeaveBalance[] = [
+  { employeeId: 'e1', paidAvailable: 24, sickAvailable: 7, unpaidAvailable: 0 },
+  { employeeId: 'e2', paidAvailable: 23, sickAvailable: 7, unpaidAvailable: 0 },
+  { employeeId: 'e3', paidAvailable: 24, sickAvailable: 7, unpaidAvailable: 0 },
+  { employeeId: 'e4', paidAvailable: 24, sickAvailable: 7, unpaidAvailable: 0 },
+  { employeeId: 'e-admin', paidAvailable: 24, sickAvailable: 7, unpaidAvailable: 0 },
 ];
 
 // Let's assume John checked in 2 hours ago
@@ -144,12 +169,74 @@ export const mockApi = {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         const user = mockAuthUsers.find(u => u.email === email);
-        if (user && password === 'password123') { // Simple mock password validation
+        const validPassword = mockPasswords[email];
+        
+        if (user && validPassword && password === validPassword) {
           resolve(user);
         } else {
           reject(new Error('Invalid email or password'));
         }
       }, 1000);
+    });
+  },
+
+  isFirstLogin: async (email: string): Promise<boolean> => {
+    return !mockPasswordChanged[email];
+  },
+
+  changePassword: async (email: string, newPassword: string): Promise<void> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        mockPasswords[email] = newPassword;
+        mockPasswordChanged[email] = true;
+        resolve();
+      }, 1000);
+    });
+  },
+
+  // REQUIRES BACKEND: Replace with POST /api/employees
+  createEmployee: async (employeeData: Partial<Employee>, tempPassword: string): Promise<User> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const newEmployeeId = `e-${Date.now()}`;
+        const newUserId = `u-${Date.now()}`;
+        
+        const newEmployee: Employee = {
+          id: newEmployeeId,
+          loginId: employeeData.loginId || 'EMP0000',
+          firstName: employeeData.firstName || '',
+          lastName: employeeData.lastName || '',
+          email: employeeData.email || '',
+          mobile: employeeData.mobile || '',
+          department: 'General',
+          designation: 'Employee',
+          company: 'Dayflow Inc.',
+          manager: 'N/A',
+          location: 'Headquarters',
+          profilePicture: `https://i.pravatar.cc/150?u=${newEmployeeId}`,
+        };
+        
+        const newUser: User = {
+          id: newUserId,
+          email: newEmployee.email,
+          role: 'employee',
+          employeeId: newEmployeeId
+        };
+
+        const newBalance: LeaveBalance = {
+          employeeId: newEmployeeId,
+          paidAvailable: 24,
+          sickAvailable: 7,
+          unpaidAvailable: 0
+        };
+
+        mockEmployees.push(newEmployee);
+        mockAuthUsers.push(newUser);
+        mockLeaveBalances.push(newBalance);
+        mockPasswords[newEmployee.email] = tempPassword;
+
+        resolve(newUser);
+      }, 1500);
     });
   },
 
@@ -347,6 +434,103 @@ export const mockApi = {
         };
         resolve(mockAttendanceRecords[recordIndex]);
       }, 500);
+    });
+  },
+
+  // TIME OFF MODULE ENDPOINTS
+  
+  getLeaveBalance: async (employeeId: string): Promise<LeaveBalance> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const balance = mockLeaveBalances.find(b => b.employeeId === employeeId);
+        resolve(balance || { employeeId, paidAvailable: 24, sickAvailable: 7, unpaidAvailable: 0 });
+      }, 500);
+    });
+  },
+
+  getTimeOffRequests: async (employeeId?: string): Promise<TimeOffRecord[]> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        let requests = [...mockTimeOffs];
+        if (employeeId) {
+          requests = requests.filter(r => r.employeeId === employeeId);
+        }
+        // Sort newest first based on ID creation timestamp roughly or just return reversed
+        resolve(requests.reverse());
+      }, 500);
+    });
+  },
+
+  createTimeOffRequest: async (
+    employeeId: string, 
+    data: Omit<TimeOffRecord, 'id' | 'employeeId' | 'employeeName' | 'status'>
+  ): Promise<TimeOffRecord> => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const emp = mockEmployees.find(e => e.id === employeeId);
+        if (!emp) {
+          return reject(new Error('Employee not found'));
+        }
+
+        const balance = mockLeaveBalances.find(b => b.employeeId === employeeId);
+        if (balance) {
+          if (data.type === 'Paid Time Off' && balance.paidAvailable < data.duration) {
+            return reject(new Error('Insufficient Paid Time Off balance.'));
+          }
+          if (data.type === 'Sick Leave' && balance.sickAvailable < data.duration) {
+            return reject(new Error('Insufficient Sick Leave balance.'));
+          }
+        }
+
+        const newRecord: TimeOffRecord = {
+          id: `t${Date.now()}`,
+          employeeId,
+          employeeName: `${emp.firstName} ${emp.lastName}`,
+          status: 'pending',
+          ...data
+        };
+        
+        mockTimeOffs.unshift(newRecord);
+        resolve(newRecord);
+      }, 800);
+    });
+  },
+
+  updateTimeOffStatus: async (requestId: string, status: 'approved' | 'rejected'): Promise<TimeOffRecord> => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const index = mockTimeOffs.findIndex(r => r.id === requestId);
+        if (index === -1) return reject(new Error('Request not found'));
+
+        const record = mockTimeOffs[index];
+        
+        // Deduct balance if approved
+        if (status === 'approved' && record.status !== 'approved') {
+          const balIndex = mockLeaveBalances.findIndex(b => b.employeeId === record.employeeId);
+          if (balIndex !== -1) {
+            if (record.type === 'Paid Time Off') {
+              mockLeaveBalances[balIndex].paidAvailable -= record.duration;
+            } else if (record.type === 'Sick Leave') {
+              mockLeaveBalances[balIndex].sickAvailable -= record.duration;
+            }
+          }
+        }
+
+        // Restore balance if changing from approved to rejected
+        if (status === 'rejected' && record.status === 'approved') {
+          const balIndex = mockLeaveBalances.findIndex(b => b.employeeId === record.employeeId);
+          if (balIndex !== -1) {
+            if (record.type === 'Paid Time Off') {
+              mockLeaveBalances[balIndex].paidAvailable += record.duration;
+            } else if (record.type === 'Sick Leave') {
+              mockLeaveBalances[balIndex].sickAvailable += record.duration;
+            }
+          }
+        }
+
+        mockTimeOffs[index].status = status;
+        resolve(mockTimeOffs[index]);
+      }, 800);
     });
   }
 };

@@ -35,10 +35,24 @@ export interface AttendanceRecord {
   extraHours?: string;
 }
 
+export type TimeOffType = 'Paid Time Off' | 'Sick Leave' | 'Unpaid Leave';
+
 export interface TimeOffRecord {
   id: string;
   employeeId: string;
+  employeeName?: string;
+  type: TimeOffType;
   startDate: string; // YYYY-MM-DD
   endDate: string; // YYYY-MM-DD
+  duration: number; // in days
   status: 'pending' | 'approved' | 'rejected';
+  remarks?: string;
+  attachmentUrl?: string;
+}
+
+export interface LeaveBalance {
+  employeeId: string;
+  paidAvailable: number;
+  sickAvailable: number;
+  unpaidAvailable: number;
 }

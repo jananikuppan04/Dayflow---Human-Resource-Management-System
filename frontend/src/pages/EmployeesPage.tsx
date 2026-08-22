@@ -6,10 +6,11 @@ import { EmployeeCard } from '../components/employee/EmployeeCard';
 import { EmployeeModal } from '../components/employee/EmployeeModal';
 import { AttendanceWidget } from '../components/attendance/AttendanceWidget';
 import { Search, Plus, Loader2 } from 'lucide-react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 export const EmployeesPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [statuses, setStatuses] = useState<Record<string, 'present' | 'leave' | 'absent'>>({});
@@ -54,25 +55,41 @@ export const EmployeesPage = () => {
   });
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8">
+    <div className="flex flex-col lg:flex-row gap-8 py-8 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto bg-slate-50 min-h-[calc(100vh-64px)]">
       {/* Main Content Area */}
       <div className="flex-1">
         {/* Header Actions */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <button className="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-sm">
+          <button 
+            onClick={() => navigate('/employees/new')}
+            className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-xl font-medium flex items-center gap-2 transition-colors shadow-sm shadow-primary-500/20 active:scale-[0.98]"
+          >
             <Plus className="w-5 h-5" />
             New Employee
           </button>
           
-          <div className="relative w-full sm:w-80 text-slate-500">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <div className="relative w-full sm:w-[380px] text-slate-500">
+            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
             <input 
               type="text" 
               placeholder="Search by name, ID or department..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all shadow-sm"
+              className="w-full pl-11 pr-12 py-3 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all shadow-sm"
             />
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 cursor-pointer hover:text-slate-600 transition-colors">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="4" y1="21" x2="4" y2="14"></line>
+                <line x1="4" y1="10" x2="4" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12" y2="3"></line>
+                <line x1="20" y1="21" x2="20" y2="16"></line>
+                <line x1="20" y1="12" x2="20" y2="3"></line>
+                <line x1="1" y1="14" x2="7" y2="14"></line>
+                <line x1="9" y1="8" x2="15" y2="8"></line>
+                <line x1="17" y1="16" x2="23" y2="16"></line>
+              </svg>
+            </div>
           </div>
         </div>
 
@@ -86,7 +103,7 @@ export const EmployeesPage = () => {
             <p className="text-slate-500 text-lg">No employees found matching your search.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredEmployees.map(emp => (
               <EmployeeCard 
                 key={emp.id}
@@ -100,7 +117,7 @@ export const EmployeesPage = () => {
       </div>
 
       {/* Right Sidebar */}
-      <div className="w-full lg:w-80 flex-shrink-0">
+      <div className="w-full lg:w-[320px] xl:w-[380px] flex-shrink-0">
         <AttendanceWidget />
       </div>
 
