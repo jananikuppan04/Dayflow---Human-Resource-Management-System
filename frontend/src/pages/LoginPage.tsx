@@ -4,6 +4,7 @@ import PageBackground from '../components/auth/PageBackground'
 import Navbar from '../components/auth/AuthNavbar'
 import { useToast, ToastContainer } from '../components/auth/Toast'
 import { useAuth } from '../store/AuthContext'
+import { mockApi } from '../services/mockApi'
 
 function EyeIcon({ open }: { open: boolean }) {
   return open ? (
@@ -34,21 +35,16 @@ export default function LoginPage() {
     if (!password)        { addToast('Please enter your password.', 'error'); return }
     setLoading(true)
     
-    // Mock API delay
-    await new Promise(r => setTimeout(r, 1600))
-    
-    setLoading(false)
-    addToast('Welcome back to Dayflow!', 'success')
-    
-    // Log in as Admin for testing (John Doe - e1)
-    login({
-      id: 'u1',
-      email: 'admin@dayflow.com',
-      role: 'admin',
-      employeeId: 'e1',
-    })
-    
-    navigate('/employees')
+    try {
+      const user = await mockApi.login(loginId.trim(), password);
+      setLoading(false);
+      addToast('Welcome back to Dayflow!', 'success');
+      login(user);
+      navigate(user.role === 'admin' ? '/employees' : '/dashboard');
+    } catch (err: any) {
+      setLoading(false);
+      addToast(err.message || 'Invalid credentials', 'error');
+    }
   }
 
   return (

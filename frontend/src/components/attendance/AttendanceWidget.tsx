@@ -7,6 +7,7 @@ import { Clock, CheckCircle2, LogOut, Loader2, AlertCircle } from 'lucide-react'
 export const AttendanceWidget = () => {
   const { user } = useAuth();
   const [record, setRecord] = useState<AttendanceRecord | null>(null);
+  const [employee, setEmployee] = useState<any>(null);
   const [status, setStatus] = useState<'loading' | 'idle' | 'present' | 'leave' | 'error'>('loading');
   const [errorMsg, setErrorMsg] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -21,6 +22,8 @@ export const AttendanceWidget = () => {
     if (!user?.employeeId) return;
     setStatus('loading');
     try {
+      const emp = await mockApi.getCurrentEmployee(user.employeeId);
+      setEmployee(emp);
       const today = new Date().toISOString().split('T')[0];
       const statuses = await mockApi.getAttendanceStatus([user.employeeId], today);
       
@@ -87,7 +90,7 @@ export const AttendanceWidget = () => {
           <Clock className="w-12 h-12 text-primary-500" />
         </div>
         <h2 className="text-xl font-bold text-slate-900">
-          Good Morning, <span className="text-primary-600">{user?.employeeId === 'e1' ? 'John' : 'User'}!</span>
+          Good Morning, <span className="text-primary-600">{employee ? employee.firstName : 'User'}!</span>
         </h2>
         <p className="text-slate-500 text-sm mt-1">Let's make today productive.</p>
       </div>

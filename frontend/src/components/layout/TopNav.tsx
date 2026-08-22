@@ -10,10 +10,10 @@ export const TopNav = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const navItems = [
-    { name: 'Employees', path: '/employees', icon: Users },
-    { name: 'Attendance', path: '/attendance', icon: Calendar },
-    { name: 'Time Off', path: '/time-off', icon: Clock },
-  ];
+    { name: 'Employees', path: '/employees', icon: Users, adminOnly: true },
+    { name: 'Attendance', path: '/attendance', icon: Calendar, adminOnly: false },
+    { name: 'Time Off', path: '/time-off', icon: Clock, adminOnly: false },
+  ].filter(item => !item.adminOnly || user?.role === 'admin');
 
   // Close dropdown when clicking outside
   useEffect(() => {

@@ -1,7 +1,27 @@
 import type { Employee, AttendanceRecord, TimeOffRecord, User } from '../types';
 
 // TEMPORARY: Isolated mock data
+const mockAuthUsers: User[] = [
+  { id: 'u-admin', email: 'admin@dayflow.com', role: 'admin', employeeId: 'e-admin' },
+  { id: 'u-john', email: 'john.doe@example.com', role: 'employee', employeeId: 'e1' },
+  { id: 'u-sarah', email: 'sarah.smith@example.com', role: 'employee', employeeId: 'e2' }
+];
+
 const mockEmployees: Employee[] = [
+  {
+    id: 'e-admin',
+    loginId: 'ADMIN001',
+    firstName: 'System',
+    lastName: 'Admin',
+    email: 'admin@dayflow.com',
+    mobile: '+1 800 000 0000',
+    department: 'Administration',
+    designation: 'HR Admin',
+    company: 'Dayflow Inc.',
+    manager: 'CEO',
+    location: 'Headquarters',
+    profilePicture: 'https://i.pravatar.cc/150?u=eadmin',
+  },
   {
     id: 'e1',
     loginId: 'EMP0012',
@@ -119,6 +139,30 @@ let mockAttendanceRecords: AttendanceRecord[] = [
 ];
 
 export const mockApi = {
+  // REQUIRES BACKEND: Replace with POST /api/auth/login
+  login: async (email: string, password: string): Promise<User> => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const user = mockAuthUsers.find(u => u.email === email);
+        if (user && password === 'password123') { // Simple mock password validation
+          resolve(user);
+        } else {
+          reject(new Error('Invalid email or password'));
+        }
+      }, 1000);
+    });
+  },
+
+  // REQUIRES BACKEND: Replace with GET /api/employees/:id
+  getCurrentEmployee: async (employeeId: string): Promise<Employee> => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const emp = mockEmployees.find(e => e.id === employeeId);
+        if (emp) resolve(emp);
+        else reject(new Error('Employee not found'));
+      }, 300);
+    });
+  },
   // REQUIRES BACKEND: Replace with GET /api/employees
   getEmployees: async (): Promise<Employee[]> => {
     return new Promise((resolve) => setTimeout(() => resolve(mockEmployees), 500));
