@@ -25,22 +25,8 @@ const ProfilePlaceholder = () => (
   </div>
 );
 
-const LoginPlaceholder = () => {
-  const { login } = useAuth();
-  return (
-    <div className="flex justify-center items-center h-screen bg-slate-50">
-      <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200 text-center">
-        <h2 className="text-2xl font-bold mb-4">Login</h2>
-        <button 
-          onClick={() => login({ id: 'u1', email: 'admin@dayflow.com', role: 'admin', employeeId: 'e1' })}
-          className="bg-primary-600 text-white px-6 py-2 rounded-lg"
-        >
-          Login as Admin (Test)
-        </button>
-      </div>
-    </div>
-  );
-};
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
 
 // Route Guard
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -56,7 +42,8 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/login" element={<LoginPlaceholder />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
           
           <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
             <Route index element={<Navigate to="/employees" replace />} />

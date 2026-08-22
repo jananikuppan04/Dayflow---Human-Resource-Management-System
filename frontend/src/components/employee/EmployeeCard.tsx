@@ -27,7 +27,7 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = ({ employee, status, on
           <div className="w-3 h-3 rounded-full bg-yellow-400 shadow-sm" title="Absent" />
         )}
         {status === 'leave' && (
-          <Plane className="w-4 h-4 text-blue-500" fill="currentColor" title="On Leave" />
+          <Plane className="w-3.5 h-3.5" fill="currentColor" />
         )}
       </div>
 

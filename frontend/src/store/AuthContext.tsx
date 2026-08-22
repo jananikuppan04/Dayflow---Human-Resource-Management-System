@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState } from 'react';
+import type { ReactNode } from 'react';
 import type { User } from '../types';
 
 interface AuthContextType {
@@ -18,7 +19,7 @@ const mockAdminUser: User = {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(mockAdminUser);
+  const [user, setUser] = useState<User | null>(null);
 
   const login = (userData: User) => {
     setUser(userData);
