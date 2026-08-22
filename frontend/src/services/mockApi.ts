@@ -354,20 +354,77 @@ export const mockApi = {
   getEmployeeAttendanceHistory: async (employeeId: string, monthPrefix: string) => {
     return new Promise<{ records: AttendanceRecord[], stats: { present: number, leaves: number, total: number } }>((resolve) => {
       setTimeout(() => {
+        const year = parseInt(monthPrefix.split('-')[0]);
+        const month = parseInt(monthPrefix.split('-')[1]) - 1; // 0-indexed
+        
         const records = mockAttendanceRecords.filter(a => a.employeeId === employeeId && a.date.startsWith(monthPrefix));
+        const leaves = mockTimeOffs.filter(t => t.employeeId === employeeId && t.status === 'approved' && (t.startDate.startsWith(monthPrefix) || t.endDate.startsWith(monthPrefix)));
+        
+        const finalRecords: AttendanceRecord[] = [];
+        let presentCount = 0;
+        let leaveCount = 0;
+        let totalWorkingDays = 0;
+        
+        const todayStr = new Date().toISOString().split('T')[0];
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
+        for (let day = 1; day <= daysInMonth; day++) {
+          const currentDate = new Date(year, month, day);
+          const dayOfWeek = currentDate.getDay();
+          
+          // Skip weekends (0 = Sunday, 6 = Saturday)
+          if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+          
+          const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          
+          // Only count working days up to today
+          if (dateStr <= todayStr) {
+             totalWorkingDays++;
+          }
+          
+          const existingRecord = records.find(r => r.date === dateStr);
+          if (existingRecord) {
+             finalRecords.push(existingRecord);
+             if (existingRecord.status === 'present') presentCount++;
+             continue;
+          }
+          
+          const hasLeave = leaves.some(l => l.startDate <= dateStr && l.endDate >= dateStr);
+          if (hasLeave) {
+             finalRecords.push({
+               id: `leave-${dateStr}`,
+               employeeId,
+               date: dateStr,
+               checkIn: null,
+               checkOut: null,
+               status: 'leave'
+             });
+             leaveCount++;
+             continue;
+          }
+          
+          // If past date and no record and no leave, mark as absent
+          if (dateStr < todayStr) {
+             finalRecords.push({
+               id: `absent-${dateStr}`,
+               employeeId,
+               date: dateStr,
+               checkIn: null,
+               checkOut: null,
+               status: 'absent'
+             });
+          }
+        }
         
         // Sort descending by date
-        records.sort((a, b) => b.date.localeCompare(a.date));
+        finalRecords.sort((a, b) => b.date.localeCompare(a.date));
 
-        const leaves = mockTimeOffs.filter(t => t.employeeId === employeeId && t.status === 'approved' && t.startDate.startsWith(monthPrefix)).length;
-        const present = records.filter(r => r.status === 'present').length;
-        
         resolve({
-          records,
+          records: finalRecords,
           stats: {
-            present,
-            leaves,
-            total: present + leaves
+            present: presentCount,
+            leaves: leaveCount,
+            total: totalWorkingDays
           }
         });
       }, 500);
@@ -428,9 +485,28 @@ export const mockApi = {
           return;
         }
 
+        const checkInTime = new Date(mockAttendanceRecords[recordIndex].checkIn!).getTime();
+        const checkOutTime = new Date().getTime();
+        const diffMinutes = Math.floor((checkOutTime - checkInTime) / 60000);
+        
+        const hours = Math.floor(diffMinutes / 60);
+        const minutes = diffMinutes % 60;
+        const workHoursStr = `${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m`;
+        
+        // Extra hours if > 8 hours
+        let extraHoursStr = '00h 00m';
+        if (diffMinutes > 480) { // 8 * 60 = 480
+           const extraMins = diffMinutes - 480;
+           const eHours = Math.floor(extraMins / 60);
+           const eMins = extraMins % 60;
+           extraHoursStr = `${String(eHours).padStart(2, '0')}h ${String(eMins).padStart(2, '0')}m`;
+        }
+
         mockAttendanceRecords[recordIndex] = {
           ...mockAttendanceRecords[recordIndex],
-          checkOut: new Date().toISOString(),
+          checkOut: new Date(checkOutTime).toISOString(),
+          workHours: workHoursStr,
+          extraHours: extraHoursStr
         };
         resolve(mockAttendanceRecords[recordIndex]);
       }, 500);

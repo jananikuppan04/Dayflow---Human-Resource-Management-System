@@ -111,10 +111,10 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({ viewType, data
                       {formatTime(rec?.checkIn)}
                     </td>
                     <td className="px-6 py-4 font-medium text-slate-700">
-                      {formatTime(rec?.checkOut)}
+                      {rec?.status === 'present' && !rec.checkOut ? <span className="text-primary-600 text-xs font-semibold bg-primary-50 px-2 py-1 rounded">In Progress</span> : formatTime(rec?.checkOut)}
                     </td>
                     <td className="px-6 py-4 text-slate-600">
-                      {rec?.workHours || '--h --m'}
+                      {rec?.workHours || (rec?.status === 'present' && !rec.checkOut ? <span className="text-xs text-slate-400 font-medium">Tracking...</span> : '--h --m')}
                     </td>
                     <td className="px-6 py-4 text-slate-600">
                       {rec?.extraHours || '--h --m'}

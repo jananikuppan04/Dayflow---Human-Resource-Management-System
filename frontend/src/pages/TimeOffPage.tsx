@@ -4,6 +4,7 @@ import { mockApi } from '../services/mockApi';
 import type { TimeOffRecord, LeaveBalance } from '../types';
 import { TimeOffBalance } from '../components/time-off/TimeOffBalance';
 import { TimeOffList } from '../components/time-off/TimeOffList';
+import { TimeOffCalendar } from '../components/time-off/TimeOffCalendar';
 import { TimeOffRequestModal } from '../components/time-off/TimeOffRequestModal';
 import { Plus, Loader2 } from 'lucide-react';
 
@@ -75,6 +76,7 @@ export const TimeOffPage = () => {
       ) : (
         <>
           {!isAdmin && balance && <TimeOffBalance balance={balance} />}
+          {!isAdmin && <TimeOffCalendar requests={requests} />}
           <TimeOffList 
             requests={requests} 
             user={user} 
