@@ -1,16 +1,18 @@
 import React from 'react';
 import { User, Lock, Wallet, FileText } from 'lucide-react';
+import { UserRole } from '../../types/salaryTypes';
 
 interface ProfileTabsProps {
   activeTab: string;
   onTabChange: (tabId: string) => void;
+  currentRole?: UserRole;
 }
 
-export const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, onTabChange }) => {
+export const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, onTabChange, currentRole }) => {
   const tabs = [
     { id: 'personal', label: 'Personal Info', icon: User },
     { id: 'private', label: 'Private Info', icon: Lock },
-    { id: 'salary', label: 'Salary Info', icon: Wallet },
+    ...(currentRole === 'ADMIN' ? [{ id: 'salary', label: 'Salary Info', icon: Wallet }] : []),
     { id: 'documents', label: 'Documents', icon: FileText },
   ];
 
@@ -26,11 +28,11 @@ export const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, onTabChange
               onClick={() => onTabChange(tab.id)}
               className={`flex items-center gap-2 py-3.5 px-3 text-sm font-semibold border-b-2 transition-all whitespace-nowrap cursor-pointer ${
                 isActive
-                  ? 'border-blue-600 text-blue-600'
+                  ? 'border-[#714B67] text-[#714B67]'
                   : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
               }`}
             >
-              <Icon className={`w-4 h-4 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
+              <Icon className={`w-4 h-4 ${isActive ? 'text-[#714B67]' : 'text-slate-400'}`} />
               <span>{tab.label}</span>
             </button>
           );

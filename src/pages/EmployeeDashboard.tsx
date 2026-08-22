@@ -23,9 +23,9 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ currentRol
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Header Greeting Banner */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-blue-900 via-indigo-950 to-slate-900 p-6 sm:p-8 rounded-3xl text-white shadow-xl">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-slate-900 via-purple-950 to-slate-900 p-6 sm:p-8 rounded-3xl text-white shadow-xl">
         <div>
-          <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold uppercase tracking-wider border border-blue-400/20">
+            <span className="px-3 py-1 rounded-full bg-[#714B67]/20 text-[#c7a9c1] text-xs font-bold uppercase tracking-wider border border-purple-400/20">
             {currentRole === 'ADMIN' ? 'HR Administrator Workspace' : 'Employee Portal'}
           </span>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mt-2">
@@ -39,15 +39,17 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ currentRol
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate('/time-off')}
-            className="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition-all cursor-pointer"
-          >
-            Apply for Leave
-          </button>
+          {currentRole !== 'ADMIN' && (
+            <button
+              onClick={() => navigate('/time-off')}
+              className="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-xl text-xs font-bold border border-white/20 transition-all cursor-pointer"
+            >
+              Apply for Leave
+            </button>
+          )}
           <button
             onClick={() => navigate('/profile')}
-            className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-md transition-all cursor-pointer"
+            className="bg-[#714B67] hover:bg-[#5f3e56] text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-md transition-all cursor-pointer"
           >
             View My Profile
           </button>
@@ -63,7 +65,7 @@ export const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ currentRol
               <span className="text-2xl font-extrabold text-slate-800">42</span>
               <span className="text-[11px] text-slate-400 block mt-1">Active Employees</span>
             </div>
-            <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-bold">
+            <div className="w-12 h-12 bg-purple-50 text-[#714B67] rounded-2xl flex items-center justify-center font-bold">
               <Users className="w-6 h-6" />
             </div>
           </div>

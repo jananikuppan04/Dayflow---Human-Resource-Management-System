@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../store/AuthContext';
 import { Shield, Users, BarChart3, Lock, User, Eye, EyeOff, Check, AlertCircle } from 'lucide-react';
+import { OdooLogo } from '../components/layout/Navbar';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -14,13 +15,12 @@ export default function LoginPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
-  // Quick role selection for convenience
   const handleSelectRole = (roleType: 'ADMIN' | 'EMPLOYEE') => {
     if (roleType === 'ADMIN') {
       setLoginId('admin@dayflow.com');
       setPassword('admin123');
     } else {
-      setLoginId('janani.dev@email.com');
+      setLoginId('OIJODO20220001'); // Original generated format OIJODO20220001
       setPassword('emp123');
     }
     setError('');
@@ -40,7 +40,6 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
 
-    // Simulate authenticating
     setTimeout(() => {
       setLoading(false);
       const isAdmin = loginId.toLowerCase().includes('admin');
@@ -57,22 +56,19 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F1F5F9] flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans">
-      {/* Main Split Authentication Window */}
+    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans">
       <div className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 border border-slate-200">
         
         {/* Left Dark Branding Panel */}
-        <div className="lg:col-span-5 bg-[#091124] text-white p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden">
-          {/* Subtle Glow Accents */}
-          <div className="absolute top-0 left-0 w-64 h-64 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 right-0 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="lg:col-span-5 bg-[#0F172A] text-white p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-64 h-64 bg-[#714B67]/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 right-0 w-64 h-64 bg-[#714B67]/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="space-y-8 relative z-10">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1">
-                <div className="w-4 h-4 rounded-full bg-purple-500 shadow-md shadow-purple-500/50" />
-                <div className="w-5 h-5 rounded-full bg-indigo-500 -ml-1.5 shadow-md shadow-indigo-500/50" />
+              <div className="w-9 h-9 rounded-xl bg-[#714B67] flex items-center justify-center text-white font-black text-sm">
+                odoo
               </div>
               <div>
                 <h1 className="font-extrabold text-xl tracking-tight leading-none text-white">Dayflow</h1>
@@ -80,13 +76,13 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="w-12 h-1 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full" />
+            <div className="w-12 h-1 bg-[#714B67] rounded-full" />
 
             {/* Headline */}
             <div className="space-y-3">
               <h2 className="text-3xl font-extrabold tracking-tight leading-tight">
                 Every workday, <br />
-                <span className="bg-gradient-to-r from-purple-400 via-indigo-300 to-blue-400 bg-clip-text text-transparent">
+                <span className="text-[#c7a9c1] font-black">
                   perfectly
                 </span>{' '}
                 aligned.
@@ -99,7 +95,7 @@ export default function LoginPage() {
             {/* Feature Bullets */}
             <div className="space-y-5 pt-2">
               <div className="flex items-start gap-3.5">
-                <div className="p-2.5 rounded-2xl bg-slate-800/80 border border-slate-700/60 text-purple-400 flex-shrink-0">
+                <div className="p-2.5 rounded-2xl bg-slate-800/80 border border-slate-700/60 text-[#c7a9c1] flex-shrink-0">
                   <Shield className="w-5 h-5" />
                 </div>
                 <div>
@@ -109,7 +105,7 @@ export default function LoginPage() {
               </div>
 
               <div className="flex items-start gap-3.5">
-                <div className="p-2.5 rounded-2xl bg-slate-800/80 border border-slate-700/60 text-indigo-400 flex-shrink-0">
+                <div className="p-2.5 rounded-2xl bg-slate-800/80 border border-slate-700/60 text-[#c7a9c1] flex-shrink-0">
                   <Users className="w-5 h-5" />
                 </div>
                 <div>
@@ -119,7 +115,7 @@ export default function LoginPage() {
               </div>
 
               <div className="flex items-start gap-3.5">
-                <div className="p-2.5 rounded-2xl bg-slate-800/80 border border-slate-700/60 text-blue-400 flex-shrink-0">
+                <div className="p-2.5 rounded-2xl bg-slate-800/80 border border-slate-700/60 text-[#c7a9c1] flex-shrink-0">
                   <BarChart3 className="w-5 h-5" />
                 </div>
                 <div>
@@ -130,12 +126,12 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Bottom Vector Illustration */}
+          {/* Bottom Illustration */}
           <div className="pt-8 relative z-10 flex justify-center">
             <img
               src="/dayflow_dashboard_illustration.png"
               alt="Dayflow HRMS Dashboard Illustration"
-              className="w-full max-w-xs object-contain opacity-90 hover:opacity-100 transition-opacity drop-shadow-2xl"
+              className="w-full max-w-xs object-contain opacity-90 hover:opacity-100 transition-opacity"
             />
           </div>
         </div>
@@ -146,8 +142,13 @@ export default function LoginPage() {
 
             {/* Lock Icon Header */}
             <div className="text-center space-y-3">
-              <div className="w-16 h-16 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center mx-auto border border-purple-100 shadow-xs">
+              <div className="w-16 h-16 rounded-full bg-purple-50 text-[#714B67] flex items-center justify-center mx-auto border border-purple-100 shadow-xs">
                 <Lock className="w-7 h-7" />
+              </div>
+              <div className="flex justify-center mb-1">
+                <span className="text-[#714B67] text-3xl font-black tracking-tighter" style={{ fontFamily: 'system-ui, sans-serif' }}>
+                  odoo
+                </span>
               </div>
               <div>
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Welcome back!</h2>
@@ -162,7 +163,7 @@ export default function LoginPage() {
                 onClick={() => handleSelectRole('ADMIN')}
                 className={`flex-1 py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   loginId.includes('admin')
-                    ? 'bg-white text-purple-700 shadow-xs'
+                    ? 'bg-white text-[#714B67] shadow-xs'
                     : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
@@ -172,9 +173,9 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => handleSelectRole('EMPLOYEE')}
-                className={`flex-1 py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                className={`flex-1 py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   !loginId.includes('admin')
-                    ? 'bg-white text-purple-700 shadow-xs'
+                    ? 'bg-white text-[#714B67] shadow-xs'
                     : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
@@ -250,7 +251,7 @@ export default function LoginPage() {
                     e.preventDefault();
                     alert('Password reset instructions sent to registered administrator.');
                   }}
-                  className="font-bold text-purple-600 hover:text-purple-700 hover:underline transition-colors"
+                  className="font-bold text-[#714B67] hover:text-[#5f3e56] hover:underline transition-colors"
                 >
                   Forgot Password?
                 </a>
@@ -260,7 +261,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 hover:opacity-95 shadow-lg shadow-purple-600/30 transition-all cursor-pointer flex items-center justify-center gap-2"
+                className="w-full py-3.5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-[#714B67] via-[#5f3e56] to-[#714B67] hover:opacity-95 shadow-lg shadow-purple-600/30 transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -273,7 +274,7 @@ export default function LoginPage() {
             {/* Security Footer Note */}
             <div className="pt-4 text-center">
               <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-[11px] font-semibold text-slate-500 border border-slate-200">
-                <Shield className="w-3.5 h-3.5 text-purple-600" />
+                <Shield className="w-3.5 h-3.5 text-[#714B67]" />
                 <span>Your information is safe with us</span>
               </div>
             </div>

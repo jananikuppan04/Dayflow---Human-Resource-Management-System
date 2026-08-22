@@ -112,7 +112,7 @@ export const EmployeesPage = () => {
                 onClick={() => setSelectedDept(dept)}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                   selectedDept === dept
-                    ? 'bg-blue-600 text-white shadow-xs'
+                    ? 'bg-[#714B67] text-white shadow-xs'
                     : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                 }`}
               >

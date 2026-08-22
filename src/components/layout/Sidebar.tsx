@@ -68,8 +68,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <div className="flex flex-col h-full bg-[#0F172A] text-slate-300 w-64 border-r border-slate-800 select-none relative">
       {/* Brand Header */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-slate-800/80">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/20 text-white font-bold">
-          <Layers className="w-5 h-5" />
+        <div className="w-9 h-9 rounded-xl bg-[#714B67] flex items-center justify-center shadow-lg shadow-purple-900/40 text-white font-bold">
+          <span className="text-sm font-black tracking-tighter">odoo</span>
         </div>
         <div>
           <h1 className="font-bold text-white text-lg tracking-tight leading-none">Dayflow</h1>
@@ -91,7 +91,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 cursor-pointer ${
                 isActive
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25 font-bold'
+                  ? 'bg-[#714B67] text-white shadow-md shadow-purple-950/50 font-bold'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
               }`}
             >
@@ -105,7 +105,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Bottom Sidebar Feature/Illustration Widget */}
       <div className="px-4 py-4 m-4 rounded-2xl bg-gradient-to-br from-slate-800/90 to-slate-900 border border-slate-700/50">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
+          <div className="w-8 h-8 rounded-lg bg-[#714B67]/10 flex items-center justify-center text-[#714B67]">
             <Wallet className="w-4 h-4" />
           </div>
           <div>
@@ -114,7 +114,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
         <div className="w-full bg-slate-700/60 rounded-full h-1.5 overflow-hidden mt-2">
-          <div className="bg-blue-500 h-full rounded-full w-3/4"></div>
+          <div className="bg-[#714B67] h-full rounded-full w-3/4"></div>
         </div>
       </div>
 
@@ -125,7 +125,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-slate-800/80 transition-colors cursor-pointer outline-none"
         >
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-semibold flex items-center justify-center text-sm shadow-sm ring-2 ring-blue-500/30">
+            <div className="w-9 h-9 rounded-full bg-[#714B67] text-white font-semibold flex items-center justify-center text-sm shadow-sm ring-2 ring-purple-500/30">
               JD
             </div>
             <div className="overflow-hidden text-left">
@@ -134,7 +134,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
           </div>
           {isUserMenuOpen ? (
-            <ChevronUp className="w-4 h-4 text-blue-400" />
+            <ChevronUp className="w-4 h-4 text-purple-400" />
           ) : (
             <ChevronDown className="w-4 h-4 text-slate-400" />
           )}

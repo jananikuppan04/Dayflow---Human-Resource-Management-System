@@ -33,11 +33,21 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({ isOpen = true, emp
 
   if (!isOpen && !employee) return null;
 
-  // Auto-generate Login ID preview e.g. COMP2026-JANANI
+  // Auto-generate Login ID preview e.g. OIJODO20220001
   const generateLoginId = () => {
-    const code = companyName.replace(/\s+/g, '').toUpperCase().slice(0, 4) || 'DAYF';
-    const nameCode = employeeName.replace(/\s+/g, '').toUpperCase().slice(0, 4) || 'EMP';
-    return `${code}${yearOfJoining}-${nameCode}001`;
+    const cleanComp = companyName.trim().replace(/[^a-zA-Z\s]/g, '');
+    const compWords = cleanComp.split(/\s+/).filter(Boolean);
+    const compCode = compWords.length >= 2 
+      ? (compWords[0][0] + compWords[1][0]).toUpperCase()
+      : (cleanComp.slice(0, 2).toUpperCase() || 'OI');
+
+    const cleanName = employeeName.trim().replace(/[^a-zA-Z\s]/g, '');
+    const nameParts = cleanName.split(/\s+/).filter(Boolean);
+    const nameCode = nameParts.length >= 2
+      ? (nameParts[0].slice(0, 2) + nameParts[nameParts.length - 1].slice(0, 2)).toUpperCase()
+      : (cleanName.slice(0, 4).toUpperCase() || 'JODO');
+
+    return `${compCode}${nameCode}${yearOfJoining}0001`;
   };
 
   const handleSubmit = (e: React.FormEvent) => {

@@ -108,7 +108,7 @@ export const AttendancePage = () => {
               placeholder="Search by employee name or ID..." 
               value={adminSearch}
               onChange={(e) => setAdminSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-xs"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all shadow-xs"
             />
           </div>
         </div>
@@ -144,7 +144,7 @@ export const AttendancePage = () => {
                 onClick={() => setAdminStatusFilter(st)}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   adminStatusFilter === st
-                    ? 'bg-blue-600 text-white shadow-xs'
+                    ? 'bg-[#714B67] text-white shadow-xs'
                     : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
@@ -155,7 +155,7 @@ export const AttendancePage = () => {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-blue-600" /></div>
+          <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[#714B67]" /></div>
         ) : (
           <AttendanceTable viewType="admin" data={filteredAdminData} />
         )}
@@ -199,7 +199,7 @@ export const AttendancePage = () => {
         </h2>
         
         {loading ? (
-          <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-blue-600" /></div>
+          <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[#714B67]" /></div>
         ) : (
           <AttendanceTable viewType="employee" data={empData} />
         )}
