@@ -1,32 +1,139 @@
-# React + TypeScript + Vite
+# 🌊 Dayflow — Human Resource Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+> **Every workday, perfectly aligned.**
 
-Currently, two official plugins are available:
+Dayflow is a modern, role-aware **Human Resource Management System (HRMS)** designed to bring essential employee and HR operations into a single, intuitive workspace.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The platform provides dedicated experiences for **Admin/HR Officers** and **Employees**, with modules for authentication, employee management, attendance tracking, employee profiles, salary information, and workplace management.
 
-## React Compiler
+The current implementation focuses on a polished frontend experience with responsive layouts, role-based UI behavior, reusable React components, mock service APIs, and an enterprise-style SaaS interface.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the Oxlint configuration
+## 🚀 Live Demo
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+### 🌐 Deployed Application
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
+**[Open Dayflow HRMS](https://dayflow-human-resource-management-s-jade.vercel.app/)**
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+### 📦 Repository
+
+**[GitHub Repository](https://github.com/jananikuppan04/Dayflow---Human-Resource-Management-System)**
+
+### 🌿 Current Development Branch
+
+`feature/Aadhava-auth-employee`
+
+---
+
+# 📌 Table of Contents
+
+- [Overview](#-overview)
+- [Problem Statement](#-problem-statement)
+- [Solution](#-solution)
+- [Objectives](#-objectives)
+- [Key Features](#-key-features)
+- [Role-Based Access](#-role-based-access)
+- [Authentication](#-authentication)
+- [Employee Management](#-employee-management)
+- [Profile & Salary Management](#-profile--salary-management)
+- [Attendance Management](#-attendance-management)
+- [Workplace Modules](#-workplace-modules)
+- [UI/UX](#-uiux)
+- [Application Routes](#-application-routes)
+- [System Architecture](#-system-architecture)
+- [Project Structure](#-project-structure)
+- [Technology Stack](#-technology-stack)
+- [Installation](#-installation)
+- [Running the Project](#-running-the-project)
+- [Production Build](#-production-build)
+- [Available Scripts](#-available-scripts)
+- [Authentication Flow](#-authentication-flow)
+- [Role Flow](#-role-flow)
+- [Attendance Flow](#-attendance-flow)
+- [Salary Flow](#-salary-flow)
+- [Component Architecture](#-component-architecture)
+- [Mock Data & Services](#-mock-data--services)
+- [Responsive Design](#-responsive-design)
+- [Current Implementation Status](#-current-implementation-status)
+- [Future Enhancements](#-future-enhancements)
+- [Security Considerations](#-security-considerations)
+- [Development Guidelines](#-development-guidelines)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Acknowledgements](#-acknowledgements)
+
+---
+
+# 🏢 Overview
+
+**Dayflow HRMS** is designed as a centralized workforce-management platform where organizations can manage employee information, attendance, salary information, and other HR-related operations through a single web application.
+
+The application provides two primary perspectives:
+
+### 👨‍💼 Admin / HR Officer
+
+Designed for HR personnel and administrators who need to:
+
+- Manage and view employees
+- Monitor attendance
+- Review employee information
+- Configure salary structures
+- Access organization-level HR functionality
+- Test role-specific application behavior
+
+### 👨‍💻 Employee
+
+Designed for employees who need to:
+
+- Access their dashboard
+- View their profile
+- View personal/private information
+- Manage/view documents
+- View salary information according to permissions
+- View their attendance
+- Access employee-specific HR functionality
+
+---
+
+# 🎯 Problem Statement
+
+Traditional HR operations are often distributed across spreadsheets, documents, emails, attendance systems, and payroll tools.
+
+This can result in:
+
+- Fragmented employee information
+- Difficult attendance tracking
+- Limited visibility into salary information
+- Manual HR operations
+- Poor role separation
+- Inconsistent employee data
+- Difficult navigation between HR modules
+
+Dayflow aims to provide a centralized and user-friendly interface for managing these common HR operations.
+
+---
+
+# 💡 Solution
+
+Dayflow brings employee and HR workflows into one responsive web application.
+
+The system provides:
+
+```text
+                    ┌──────────────────────┐
+                    │      DAYFLOW HRMS    │
+                    └──────────┬───────────┘
+                               │
+              ┌────────────────┴────────────────┐
+              │                                 │
+       ┌──────▼──────┐                   ┌──────▼──────┐
+       │ ADMIN / HR  │                   │  EMPLOYEE   │
+       └──────┬──────┘                   └──────┬──────┘
+              │                                 │
+       ┌──────▼────────────┐             ┌──────▼────────────┐
+       │ Employee Mgmt    │             │ Personal Profile │
+       │ Attendance       │             │ Salary View      │
+       │ Salary Config    │             │ Attendance       │
+       │ HR Operations    │             │ Documents        │
+       └──────────────────┘             └───────────────────┘
