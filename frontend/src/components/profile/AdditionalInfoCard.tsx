@@ -1,5 +1,5 @@
 import React from 'react';
-import { EmployeeProfile } from '../../types/salaryTypes';
+import type { EmployeeProfile } from '../../types/salaryTypes';
 
 interface AdditionalInfoCardProps {
   employee: EmployeeProfile;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { SalaryStructure } from '../../types/salaryTypes';
+import type { SalaryStructure } from '../../types/salaryTypes';
 
 interface SalaryComponentsCardProps {
   salary: SalaryStructure;

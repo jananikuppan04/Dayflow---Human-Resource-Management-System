@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Edit2, Plus, Award, Code, Check, X, Sparkles, Heart, Smile } from 'lucide-react';
 
-export const PersonalInfoTab: React.FC = () => {
+export const ResumeTab: React.FC = () => {
   const [aboutText, setAboutText] = useState(
     'Passionate Software Engineer with 4+ years of experience building modern enterprise applications, high-performance web systems, and intuitive user interfaces. Strong focus on clean architecture, scalable frontend development, and seamless UX.'
   );

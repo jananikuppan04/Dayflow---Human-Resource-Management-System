@@ -1,26 +1,31 @@
 import React, { useState } from 'react';
 import { User, CreditCard, Lock, Calendar, MapPin, Mail, Globe, Heart, Shield, Edit2, Check, X } from 'lucide-react';
+import type { EmployeeProfile } from '../../types/salaryTypes';
 
-export const PrivateInfoTab: React.FC = () => {
+interface PrivateInfoTabProps {
+  employee: EmployeeProfile | null;
+}
+
+export const PrivateInfoTab: React.FC<PrivateInfoTabProps> = ({ employee }) => {
   const [personalDetails, setPersonalDetails] = useState({
     dob: '15 Aug 1996',
     address: '123 Green Glen Layout, Bellandur, Bangalore, Karnataka - 560103',
     nationality: 'Indian',
-    personalEmail: 'janani.personal@gmail.com',
+    personalEmail: employee?.email || 'janani.personal@gmail.com',
     gender: 'Female',
     maritalStatus: 'Single',
-    dateOfJoining: '10 Jan 2023',
+    dateOfJoining: employee?.effectiveFrom || '10 Jan 2023',
     emergencyContact: 'Ramesh Devi (Father) • +91 98765 00000',
   });
 
   const [bankDetails, setBankDetails] = useState({
-    accountName: 'Janani Devi',
+    accountName: employee?.name || 'Janani Devi',
     accountNumber: '50100234984829',
     bankName: 'HDFC Bank Ltd.',
     ifscCode: 'HDFC0001234',
     panNo: 'ABCDE1234F',
     uanNo: '101234567890',
-    empCode: 'EMP-1001',
+    empCode: employee?.employeeId || 'EMP-1001',
   });
 
   const [editing, setEditing] = useState(false);

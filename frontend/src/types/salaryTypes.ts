@@ -1,8 +1,8 @@
 export type UserRole = 'ADMIN' | 'EMPLOYEE';
 
 export interface EmployeeProfile {
-  id: string;
-  employeeId: string;
+  id: string; // The UUID from mockApi
+  employeeId: string; // Login ID like EMP0012
   name: string;
   designation: string;
   email: string;
@@ -11,11 +11,11 @@ export interface EmployeeProfile {
   department: string;
   manager: string;
   location: string;
-  avatarUrl?: string;
-  payGrade: string;
-  employmentType: string;
-  effectiveFrom: string;
-  lastUpdated: string;
+  payGrade?: string;
+  employmentType?: string;
+  effectiveFrom?: string;
+  lastUpdated?: string;
+  profilePicture?: string;
 }
 
 export type ComponentCalculationType = 'PERCENTAGE_WAGE' | 'PERCENTAGE_BASIC' | 'FIXED' | 'RESIDUAL';

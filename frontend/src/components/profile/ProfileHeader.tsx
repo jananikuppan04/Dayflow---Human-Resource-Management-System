@@ -1,6 +1,6 @@
 import React from 'react';
 import { Camera, Lock, Mail, Phone, Building, Briefcase, UserCheck, MapPin } from 'lucide-react';
-import { EmployeeProfile } from '../../types/salaryTypes';
+import type { EmployeeProfile } from '../../types/salaryTypes';
 
 interface ProfileHeaderProps {
   employee: EmployeeProfile;
@@ -14,9 +14,22 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ employee }) => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
           {/* Avatar with Edit Camera Badge */}
           <div className="relative group">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-rose-200 via-pink-100 to-indigo-100 border-2 border-white shadow-md flex items-center justify-center text-slate-800 font-bold text-2xl tracking-wider">
-              JD
-            </div>
+            {employee.profilePicture ? (
+              <img
+                src={employee.profilePicture}
+                alt={employee.name}
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover object-center border-2 border-white shadow-md"
+              />
+            ) : (
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-rose-200 via-pink-100 to-indigo-100 border-2 border-white shadow-md flex items-center justify-center text-slate-800 font-bold text-2xl tracking-wider">
+                {employee.name
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')
+                  .substring(0, 2)
+                  .toUpperCase()}
+              </div>
+            )}
             <button
               className="absolute bottom-0 right-0 p-1.5 bg-white rounded-full shadow-md border border-slate-200 text-slate-600 hover:text-blue-600 transition-colors"
               title="Change Profile Picture"

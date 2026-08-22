@@ -1,4 +1,4 @@
-import {
+import type {
   SalaryStructure,
   SalaryComponentConfig,
   EmployeeProfile,
@@ -7,23 +7,7 @@ import {
   UserRole,
 } from '../types/salaryTypes';
 
-// Initial default employee profile matching Dayflow design reference
-export const DEFAULT_EMPLOYEE_PROFILE: EmployeeProfile = {
-  id: 'emp_1001',
-  employeeId: 'EMP-1001',
-  name: 'Janani Devi',
-  designation: 'Software Engineer',
-  email: 'janani.dev@email.com',
-  phone: '+91 98765 43210',
-  company: 'Dayflow Solutions Pvt. Ltd.',
-  department: 'Engineering',
-  manager: 'Rohit Sharma',
-  location: 'Bangalore, India',
-  payGrade: 'SG-2',
-  employmentType: 'Full Time',
-  effectiveFrom: '01 Jan 2026',
-  lastUpdated: '01 Aug 2026',
-};
+
 
 // Initial component templates based on hand-drawn sketch requirements & reference UI
 const DEFAULT_COMPONENT_TEMPLATES: SalaryComponentConfig[] = [
@@ -225,13 +209,35 @@ export function validateSalaryComponents(
   return { valid: true, total };
 }
 
+import { mockApi } from './mockApi';
+
 const STORAGE_KEY = 'dayflow_salary_data';
 
 export const salaryService = {
   /**
    * Fetch employee profile and salary structure
    */
-  async getSalaryData(employeeId: string = 'EMP-1001'): Promise<{ employee: EmployeeProfile; salary: SalaryStructure }> {
+  async getSalaryData(employeeId: string): Promise<{ employee: EmployeeProfile; salary: SalaryStructure }> {
+    // 1. Fetch real employee data
+    const apiEmployee = await mockApi.getCurrentEmployee(employeeId);
+    const realProfile: EmployeeProfile = {
+      id: apiEmployee.id,
+      employeeId: apiEmployee.loginId,
+      name: `${apiEmployee.firstName} ${apiEmployee.lastName}`,
+      designation: apiEmployee.designation,
+      email: apiEmployee.email,
+      phone: apiEmployee.mobile,
+      company: apiEmployee.company,
+      department: apiEmployee.department,
+      manager: apiEmployee.manager,
+      location: apiEmployee.location,
+      payGrade: 'SG-2', // mock default
+      employmentType: 'Full Time',
+      effectiveFrom: '01 Jan 2026',
+      lastUpdated: '01 Aug 2026',
+      profilePicture: apiEmployee.profilePicture, // I need to add profilePicture to EmployeeProfile type
+    };
+
     const saved = localStorage.getItem(`${STORAGE_KEY}_${employeeId}`);
     if (saved) {
       try {
@@ -244,7 +250,7 @@ export const salaryService = {
           parsed.salary.workingSchedule
         );
         return {
-          employee: parsed.employee,
+          employee: realProfile, // Always use fresh profile data
           salary: recalculated,
         };
       } catch (e) {
@@ -261,7 +267,7 @@ export const salaryService = {
     );
 
     return {
-      employee: DEFAULT_EMPLOYEE_PROFILE,
+      employee: realProfile,
       salary: defaultSalary,
     };
   },
@@ -297,7 +303,6 @@ export const salaryService = {
     );
 
     const payload = {
-      employee: DEFAULT_EMPLOYEE_PROFILE,
       salary: updatedSalary,
       updatedAt: new Date().toISOString(),
     };

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Settings, Lock, AlertCircle, RefreshCw } from 'lucide-react';
-import { UserRole, SalaryStructure, EmployeeProfile } from '../../types/salaryTypes';
+import type { UserRole, SalaryStructure, EmployeeProfile } from '../../types/salaryTypes';
 import { salaryService } from '../../services/salaryService';
+import { useAuth } from '../../store/AuthContext';
 
 import { ProfileHeader } from './ProfileHeader';
 import { ProfileTabs } from './ProfileTabs';
@@ -14,16 +15,14 @@ import { SalaryHelpBanner } from './SalaryHelpBanner';
 import { SalaryConfigModal } from './SalaryConfigModal';
 import { UnauthorizedState } from './UnauthorizedState';
 
-import { PersonalInfoTab } from './PersonalInfoTab';
+import { ResumeTab } from './ResumeTab';
 import { PrivateInfoTab } from './PrivateInfoTab';
-import { DocumentsTab } from './DocumentsTab';
+import { SecurityTab } from './SecurityTab';
 
-interface SalaryInfoPageProps {
-  currentRole: UserRole;
-}
-
-export const SalaryInfoPage: React.FC<SalaryInfoPageProps> = ({ currentRole }) => {
-  const [activeTab, setActiveTab] = useState<string>('salary');
+export const ProfilePage: React.FC = () => {
+  const { user } = useAuth();
+  const currentRole: UserRole = user?.role === 'admin' ? 'ADMIN' : 'EMPLOYEE';
+  const [activeTab, setActiveTab] = useState<string>('resume');
   const [employee, setEmployee] = useState<EmployeeProfile | null>(null);
   const [salary, setSalary] = useState<SalaryStructure | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -38,10 +37,11 @@ export const SalaryInfoPage: React.FC<SalaryInfoPageProps> = ({ currentRole }) =
   }, []);
 
   const loadSalaryData = async () => {
+    if (!user?.employeeId) return;
     setLoading(true);
     setError(null);
     try {
-      const data = await salaryService.getSalaryData('EMP-1001');
+      const data = await salaryService.getSalaryData(user.employeeId);
       setEmployee(data.employee);
       setSalary(data.salary);
     } catch (err: any) {
@@ -101,14 +101,14 @@ export const SalaryInfoPage: React.FC<SalaryInfoPageProps> = ({ currentRole }) =
       <ProfileHeader employee={employee} />
 
       {/* 2. Profile Tabs (Personal, Private, Salary, Documents) */}
-      <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} role={currentRole} />
 
       {/* Render selected tab content */}
-      {activeTab === 'personal' && <PersonalInfoTab />}
-      {activeTab === 'private' && <PrivateInfoTab />}
-      {activeTab === 'documents' && <DocumentsTab />}
+      {activeTab === 'resume' && <ResumeTab />}
+      {activeTab === 'private' && <PrivateInfoTab employee={employee} />}
+      {activeTab === 'security' && <SecurityTab />}
 
-      {activeTab === 'salary' && (
+      {activeTab === 'salary' && currentRole === 'ADMIN' && (
         <div className="space-y-6 animate-in fade-in duration-150">
           {/* Permission restriction warning banner if non-admin attempted edit */}
           {showPermissionAlert && (

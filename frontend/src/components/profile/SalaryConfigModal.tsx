@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, AlertCircle, Save, Check, RefreshCw } from 'lucide-react';
-import {
+import type {
   SalaryStructure,
   SalaryComponentConfig,
   DeductionsConfig,

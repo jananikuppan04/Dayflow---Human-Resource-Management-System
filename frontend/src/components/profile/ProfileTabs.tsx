@@ -1,18 +1,23 @@
 import React from 'react';
-import { User, Lock, Wallet, FileText } from 'lucide-react';
+import { User, Lock, Wallet, Shield } from 'lucide-react';
+import type { UserRole } from '../../types/salaryTypes';
 
 interface ProfileTabsProps {
   activeTab: string;
   onTabChange: (tabId: string) => void;
+  role: UserRole;
 }
 
-export const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, onTabChange }) => {
-  const tabs = [
-    { id: 'personal', label: 'Personal Info', icon: User },
+export const ProfileTabs: React.FC<ProfileTabsProps> = ({ activeTab, onTabChange, role }) => {
+  const allTabs = [
+    { id: 'resume', label: 'Resume', icon: User },
     { id: 'private', label: 'Private Info', icon: Lock },
     { id: 'salary', label: 'Salary Info', icon: Wallet },
-    { id: 'documents', label: 'Documents', icon: FileText },
+    { id: 'security', label: 'Security', icon: Shield },
   ];
+
+  // Strictly hide Salary Info from non-admins
+  const tabs = allTabs.filter(tab => tab.id !== 'salary' || role === 'ADMIN');
 
   return (
     <div className="border-b border-slate-200 bg-white px-2 rounded-xl shadow-xs">

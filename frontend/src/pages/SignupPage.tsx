@@ -1,7 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast, ToastContainer } from '../components/auth/Toast';
-import { Shield, CheckCircle2, LayoutDashboard, Copy, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, UserCog, BarChart4, CheckCircle2, Copy, ArrowLeft, LayoutDashboard, Shield } from 'lucide-react';
+
+const DayflowLogoIcon = ({ className = "w-8 h-8" }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+    <rect x="2" y="4" width="8" height="16" rx="3" fill="#8b5cf6" />
+    <rect x="12" y="12" width="10" height="8" rx="3" fill="#c4b5fd" />
+    <circle cx="17" cy="6" r="4" fill="#c4b5fd" />
+  </svg>
+);
 import { mockApi } from '../services/mockApi';
 
 function computeLoginId(firstName: string, lastName: string, year: string) {
@@ -85,44 +93,61 @@ export default function SignupPage() {
           </button>
           
           <div className="flex items-center gap-3 mb-10">
-            <div className="w-10 h-10 bg-primary-500 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
-              <LayoutDashboard className="w-5 h-5 text-white" />
+            <DayflowLogoIcon className="w-8 h-8" />
+            <div className="flex flex-col">
+              <span className="font-bold text-xl tracking-tight leading-none">Dayflow</span>
+              <span className="text-[11px] text-[#a4a0cf] font-medium mt-1">HRM System</span>
             </div>
-            <span className="font-bold text-2xl tracking-tight">Dayflow</span>
           </div>
 
-          <h1 className="text-4xl font-bold leading-tight mb-4 tracking-tight">
-            Build your team<br/>
-            <span className="text-primary-300">securely.</span>
+          <h1 className="text-3xl font-bold leading-tight mb-3 tracking-tight">
+            Every workday,<br />
+            <span className="text-primary-300">perfectly</span> aligned.
           </h1>
-          <p className="text-[#a4a0cf] text-lg max-w-sm leading-relaxed mb-12 font-medium">
-            Create secure employee accounts and get your workforce connected instantly.
+          <p className="text-[#a4a0cf] text-sm max-w-sm leading-relaxed mb-8 font-medium">
+            Dayflow HRM helps you manage your workforce, streamline HR operations, and empower your people.
           </p>
 
-          <div className="space-y-6">
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full border border-[#43389a] bg-[#2a2266] flex items-center justify-center">
-                <Shield className="w-5 h-5 text-primary-300" />
+          <div className="space-y-4">
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full border border-[#43389a] bg-[#2a2266] flex items-center justify-center">
+                <ShieldCheck className="w-4 h-4 text-primary-300" />
               </div>
               <div>
-                <h3 className="font-semibold text-white mb-1">HR Protected Tool</h3>
-                <p className="text-sm text-[#8c86bc] leading-relaxed max-w-[240px]">
-                  Only administrators can access this creation portal.
+                <h3 className="text-sm font-semibold text-white mb-0.5">Secure & Reliable</h3>
+                <p className="text-xs text-[#8c86bc] leading-relaxed max-w-[250px]">
+                  Your data is protected with enterprise-grade security.
                 </p>
               </div>
             </div>
             
-            <div className="flex gap-4">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full border border-[#43389a] bg-[#2a2266] flex items-center justify-center">
-                <CheckCircle2 className="w-5 h-5 text-primary-300" />
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full border border-[#43389a] bg-[#2a2266] flex items-center justify-center">
+                <UserCog className="w-4 h-4 text-primary-300" />
               </div>
               <div>
-                <h3 className="font-semibold text-white mb-1">Automated Security</h3>
-                <p className="text-sm text-[#8c86bc] leading-relaxed max-w-[240px]">
-                  Credentials are generated securely and reset on first login.
+                <h3 className="text-sm font-semibold text-white mb-0.5">Role-Based Access</h3>
+                <p className="text-xs text-[#8c86bc] leading-relaxed max-w-[250px]">
+                  Admins and Employees get the right access they need.
                 </p>
               </div>
             </div>
+            
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full border border-[#43389a] bg-[#2a2266] flex items-center justify-center">
+                <BarChart4 className="w-4 h-4 text-primary-300" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-white mb-0.5">Smart Insights</h3>
+                <p className="text-xs text-[#8c86bc] leading-relaxed max-w-[250px]">
+                  Make data-driven decisions with powerful analytics.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 relative flex justify-center">
+            <img src="/assets/auth-illustration.jpg" alt="Dashboard Illustration" className="w-full max-w-[320px] rounded-xl shadow-2xl border border-[#43389a]/30 object-cover" />
           </div>
         </div>
 
@@ -136,10 +161,8 @@ export default function SignupPage() {
         
         {/* Mobile Logo & Back */}
         <div className="lg:hidden flex items-center justify-between mb-8 mt-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center shadow-md shadow-primary-600/20">
-              <LayoutDashboard className="w-5 h-5 text-white" />
-            </div>
+          <div className="flex items-center gap-3">
+            <DayflowLogoIcon className="w-8 h-8 text-primary-600" />
             <span className="font-bold text-2xl text-slate-900 tracking-tight">Dayflow</span>
           </div>
           <button onClick={() => navigate('/employees')} className="text-sm font-semibold text-slate-500">Back</button>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Calendar, CreditCard } from 'lucide-react';
-import { SalaryStructure } from '../../types/salaryTypes';
+import type { SalaryStructure } from '../../types/salaryTypes';
 
 interface SalaryOverviewCardProps {
   salary: SalaryStructure;

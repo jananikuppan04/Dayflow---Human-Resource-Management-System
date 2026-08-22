@@ -1,5 +1,5 @@
 import React from 'react';
-import { DeductionsConfig } from '../../types/salaryTypes';
+import type { DeductionsConfig } from '../../types/salaryTypes';
 
 interface DeductionsCardProps {
   deductions: DeductionsConfig;
