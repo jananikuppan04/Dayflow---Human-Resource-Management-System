@@ -13,6 +13,7 @@ frontend/node_modules/
 dist/
 dist-ssr/
 frontend/dist/
+*.tsbuildinfo
 
 # Environment files
 .env
