@@ -16,6 +16,10 @@ The current implementation focuses on a polished frontend experience with respon
 
 **[Open Dayflow HRMS](https://dayflow-human-resource-management-s-jade.vercel.app/)**
 
+### Demo Flow 
+
+**[Open Dayflow HRMS](https://drive.google.com/drive/folders/16F7TGttngcQJ2KH5MSRl4wSjfk632cVE)**
+
 ### 📦 Repository
 
 **[GitHub Repository](https://github.com/jananikuppan04/Dayflow---Human-Resource-Management-System)**
