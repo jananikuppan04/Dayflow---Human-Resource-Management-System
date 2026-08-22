@@ -85,9 +85,9 @@ export const TimeOffRequestModal: React.FC<TimeOffRequestModalProps> = ({ user, 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm transition-opacity">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
-        <div className="flex items-center justify-between p-6 border-b border-slate-100">
+        <div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-slate-100">
           <h2 className="text-xl font-bold text-slate-900">New Time Off Request</h2>
           <button 
             onClick={onClose}
@@ -97,7 +97,7 @@ export const TimeOffRequestModal: React.FC<TimeOffRequestModalProps> = ({ user, 
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6">
+        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex-1">
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-700 rounded-xl text-sm font-medium">
               {error}

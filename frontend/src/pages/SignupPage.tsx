@@ -75,7 +75,7 @@ export default function SignupPage() {
       <ToastContainer toasts={toasts} />
       
       {/* Left Branding Panel (Hidden on Mobile) */}
-      <div className="hidden lg:flex flex-col justify-between w-[40%] xl:w-[35%] bg-[#211a52] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#322382] to-[#211a52] p-12 text-white shadow-2xl z-10 relative overflow-hidden fixed h-screen">
+      <div className="hidden lg:flex flex-col justify-between w-[40%] xl:w-[35%] bg-[#211a52] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-[#322382] to-[#211a52] p-12 text-white shadow-2xl z-10 relative overflow-hidden sticky top-0 h-screen">
         {/* Subtle decorative background pattern */}
         <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
         
@@ -132,7 +132,7 @@ export default function SignupPage() {
       </div>
 
       {/* Right Auth Panel */}
-      <div className="flex-1 flex flex-col justify-center px-4 sm:px-8 lg:px-16 bg-slate-50 relative lg:ml-[40%] xl:ml-[35%] py-12 min-h-screen overflow-y-auto">
+      <div className="flex-1 flex flex-col justify-center px-4 sm:px-8 lg:px-16 bg-slate-50 relative py-12 min-h-screen">
         
         {/* Mobile Logo & Back */}
         <div className="lg:hidden flex items-center justify-between mb-8 mt-4">
