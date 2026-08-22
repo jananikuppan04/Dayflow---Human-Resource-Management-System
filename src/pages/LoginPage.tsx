@@ -31,9 +31,10 @@ export default function LoginPage() {
     if (!loginId.trim()) { addToast('Please enter your login ID or email.', 'error'); return }
     if (!password)        { addToast('Please enter your password.', 'error'); return }
     setLoading(true)
-    await new Promise(r => setTimeout(r, 1600))
+    await new Promise(r => setTimeout(r, 1200))
     setLoading(false)
     addToast('Welcome back to Dayflow!', 'success')
+    setTimeout(() => navigate('/profile'), 800)
   }
 
   return (
