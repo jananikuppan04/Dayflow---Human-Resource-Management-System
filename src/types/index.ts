@@ -22,7 +22,7 @@ export interface Employee {
   profilePicture: string;
 }
 
-export type AttendanceStatus = 'present' | 'leave' | 'absent';
+export type AttendanceStatus = 'present' | 'leave' | 'absent' | 'half_day' | 'late';
 
 export interface AttendanceRecord {
   id: string;
@@ -33,6 +33,7 @@ export interface AttendanceRecord {
   status: AttendanceStatus;
   workHours?: string;
   extraHours?: string;
+  remarks?: string;
 }
 
 export interface TimeOffRecord {

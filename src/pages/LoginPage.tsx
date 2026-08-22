@@ -4,6 +4,9 @@ import PageBackground from '../components/PageBackground'
 import Navbar from '../components/Navbar'
 import { useToast, ToastContainer } from '../components/Toast'
 
+import { useAuth } from '../store/AuthContext'
+import { mockApi } from '../services/mockApi'
+
 function EyeIcon({ open }: { open: boolean }) {
   return open ? (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -19,6 +22,7 @@ function EyeIcon({ open }: { open: boolean }) {
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const { toasts, addToast } = useToast()
   const [loginId, setLoginId] = useState('')
   const [password, setPassword] = useState('')
@@ -31,10 +35,16 @@ export default function LoginPage() {
     if (!loginId.trim()) { addToast('Please enter your login ID or email.', 'error'); return }
     if (!password)        { addToast('Please enter your password.', 'error'); return }
     setLoading(true)
-    await new Promise(r => setTimeout(r, 1200))
-    setLoading(false)
-    addToast('Welcome back to Dayflow!', 'success')
-    setTimeout(() => navigate('/profile'), 800)
+    try {
+      const user = await mockApi.login(loginId.trim(), password)
+      login(user)
+      addToast('Welcome back to Dayflow!', 'success')
+      setTimeout(() => navigate('/dashboard'), 800)
+    } catch (err: any) {
+      addToast(err.message || 'Login failed', 'error')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

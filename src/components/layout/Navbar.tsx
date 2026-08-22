@@ -6,12 +6,14 @@ interface NavbarProps {
   currentRole: UserRole;
   onRoleToggle: (newRole: UserRole) => void;
   onOpenMobileSidebar?: () => void;
+  activePageTitle?: string;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   currentRole,
   onRoleToggle,
   onOpenMobileSidebar,
+  activePageTitle = 'Dashboard',
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -41,7 +43,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           <Menu className="w-5 h-5" />
         </button>
-        <h2 className="text-xl font-bold text-slate-800 tracking-tight">My Profile</h2>
+        <h2 className="text-xl font-bold text-slate-800 tracking-tight">{activePageTitle}</h2>
       </div>
 
       {/* Right side: User Profile Dropdown with Role Switcher & Notifications */}

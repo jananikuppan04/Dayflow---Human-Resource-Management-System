@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
-import { AuthProvider } from './store/AuthContext';
+import { AuthProvider, useAuth } from './store/AuthContext';
 import { Sidebar } from './components/layout/Sidebar';
 import { Navbar } from './components/layout/Navbar';
 import { SalaryInfoPage } from './components/profile/SalaryInfoPage';
@@ -13,7 +13,8 @@ import { UserRole } from './types/salaryTypes';
 import { Clock, Wallet, FileBarChart, Settings as SettingsIcon } from 'lucide-react';
 
 function MainAppLayout() {
-  const [currentRole, setCurrentRole] = useState<UserRole>('ADMIN');
+  const { user } = useAuth();
+  const [currentRole, setCurrentRole] = useState<UserRole>(user?.role === 'admin' ? 'ADMIN' : 'EMPLOYEE');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -32,6 +33,19 @@ function MainAppLayout() {
   };
 
   const activeNav = getActiveNavItem(location.pathname);
+
+  // Human-readable page title for the navbar header
+  const pageTitleMap: Record<string, string> = {
+    Dashboard: 'Dashboard',
+    'My Profile': 'My Profile',
+    Employees: 'Employees',
+    Attendance: 'Attendance',
+    'Time Off': 'Time Off',
+    Payroll: 'Payroll',
+    Reports: 'Reports',
+    Settings: 'Settings',
+  };
+  const activePageTitle = pageTitleMap[activeNav] || activeNav;
 
   const handleNavigate = (item: string) => {
     const routeMap: Record<string, string> = {
@@ -64,6 +78,7 @@ function MainAppLayout() {
           currentRole={currentRole}
           onRoleToggle={setCurrentRole}
           onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
+          activePageTitle={activePageTitle}
         />
 
         {/* Dynamic Page Container */}
@@ -174,14 +189,22 @@ function MainAppLayout() {
   );
 }
 
+function AppRoutes() {
+  const { user } = useAuth();
+  
+  return (
+    <Routes>
+      <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/dashboard" replace />} />
+      <Route path="/signup" element={!user ? <SignupPage /> : <Navigate to="/dashboard" replace />} />
+      <Route path="/*" element={user ? <MainAppLayout /> : <Navigate to="/login" replace />} />
+    </Routes>
+  );
+}
+
 export function App() {
   return (
     <AuthProvider>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/*" element={<MainAppLayout />} />
-      </Routes>
+      <AppRoutes />
     </AuthProvider>
   );
 }

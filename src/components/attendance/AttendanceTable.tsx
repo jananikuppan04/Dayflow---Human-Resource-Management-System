@@ -1,151 +1,167 @@
 import React from 'react';
+import { ClipboardList, RefreshCw } from 'lucide-react';
+import { StatusBadge } from './StatusBadge';
 import type { AttendanceRecord, Employee } from '../../types';
-
-export type TableViewType = 'admin' | 'employee';
 
 export interface AttendanceRowData {
   record: AttendanceRecord | null;
-  employee?: Employee; // Only used in admin view
-  date?: string;       // Only used in employee view (record date or empty date if missing)
+  employee?: Employee;
+  date?: string;
 }
 
 interface AttendanceTableProps {
-  viewType: TableViewType;
+  viewType: 'admin' | 'employee';
   data: AttendanceRowData[];
+  onRowClick?: (row: AttendanceRowData) => void;
+  emptyLabel?: string;
 }
 
-export const AttendanceTable: React.FC<AttendanceTableProps> = ({ viewType, data }) => {
-  const formatTime = (isoString?: string | null) => {
-    if (!isoString) return '--:--';
-    return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-  };
+function formatTime(iso: string | null | undefined) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+}
 
-  const formatDate = (isoString?: string) => {
-    if (!isoString) return '--/--/----';
-    const d = new Date(isoString);
-    return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
-  };
+function formatDate(dateStr: string) {
+  return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
+}
 
-  const renderStatus = (status?: string) => {
-    if (!status) return null;
-    
-    switch (status) {
-      case 'present':
-        return (
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-50 text-green-700 text-xs font-semibold border border-green-100">
-            <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-            Present
-          </div>
-        );
-      case 'absent':
-        return (
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-yellow-50 text-yellow-700 text-xs font-semibold border border-yellow-100">
-            <div className="w-1.5 h-1.5 rounded-full bg-yellow-500" />
-            Absent
-          </div>
-        );
-      case 'leave':
-        return (
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-semibold border border-purple-100">
-            <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
-            Leave
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
+function getInitials(emp: Employee) {
+  return `${emp.firstName[0]}${emp.lastName[0]}`;
+}
+
+const avatarColors = [
+  'bg-blue-500', 'bg-violet-500', 'bg-emerald-500', 'bg-amber-500',
+  'bg-pink-500', 'bg-indigo-500', 'bg-teal-500', 'bg-rose-500'
+];
+function getAvatarColor(id: string) {
+  let hash = 0;
+  for (const c of id) hash = (hash * 31 + c.charCodeAt(0)) % avatarColors.length;
+  return avatarColors[hash];
+}
+
+// Skeleton loader row
+const SkeletonRow = ({ cols }: { cols: number }) => (
+  <tr>
+    {Array.from({ length: cols }).map((_, i) => (
+      <td key={i} className="px-4 py-3">
+        <div className="h-4 bg-slate-100 rounded animate-pulse" style={{ width: i === 0 ? '80%' : '60%' }} />
+      </td>
+    ))}
+  </tr>
+);
+
+export const AttendanceTable: React.FC<AttendanceTableProps> = ({ viewType, data, onRowClick, emptyLabel }) => {
+  const isAdmin = viewType === 'admin';
+
+  if (data.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center py-20 px-6">
+        <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
+          <ClipboardList className="w-8 h-8 text-slate-300" />
+        </div>
+        <h3 className="text-base font-bold text-slate-700 mb-1">No attendance records</h3>
+        <p className="text-sm text-slate-400 text-center mb-5">{emptyLabel || 'Attendance records will appear here once employees check in.'}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+        >
+          <RefreshCw className="w-4 h-4" />
+          Refresh
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm whitespace-nowrap">
-          <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 font-semibold">
-            <tr>
-              <th className="px-6 py-4">
-                {viewType === 'admin' ? 'Employee' : 'Date'}
-              </th>
-              <th className="px-6 py-4">Check In</th>
-              <th className="px-6 py-4">Check Out</th>
-              <th className="px-6 py-4">Work Hours</th>
-              <th className="px-6 py-4">Extra Hours</th>
-              <th className="px-6 py-4">Status</th>
+        <table className="w-full min-w-[640px]">
+          <thead>
+            <tr className="bg-slate-50 border-b border-slate-100">
+              {isAdmin && (
+                <th className="text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider px-5 py-3.5">Employee</th>
+              )}
+              <th className="text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider px-4 py-3.5">Date</th>
+              <th className="text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider px-4 py-3.5">Check In</th>
+              <th className="text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider px-4 py-3.5">Check Out</th>
+              <th className="text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider px-4 py-3.5">Work Hrs</th>
+              <th className="text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider px-4 py-3.5">Extra Hrs</th>
+              <th className="text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider px-4 py-3.5">Status</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
-            {data.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="px-6 py-8 text-center text-slate-500">
-                  No attendance records found.
-                </td>
-              </tr>
-            ) : (
-              data.map((row, idx) => {
-                const rec = row.record;
-                const key = rec ? rec.id : `row-${idx}`;
-                
-                return (
-                  <tr key={key} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4">
-                      {viewType === 'admin' && row.employee ? (
-                        <div className="flex items-center gap-3">
-                          <img 
-                            src={row.employee.profilePicture} 
-                            alt={row.employee.firstName} 
-                            className="w-8 h-8 rounded-full bg-slate-200 object-cover"
-                          />
-                          <div>
-                            <div className="font-semibold text-slate-900">
-                              {row.employee.firstName} {row.employee.lastName}
-                            </div>
-                            <div className="text-xs text-slate-500">{row.employee.designation}</div>
+          <tbody className="divide-y divide-slate-50">
+            {data.map((row, idx) => {
+              const rec = row.record;
+              const emp = row.employee;
+              const dateStr = rec?.date || row.date || '';
+
+              return (
+                <tr
+                  key={rec?.id || idx}
+                  onClick={() => onRowClick?.(row)}
+                  className={`transition-colors duration-100 ${onRowClick ? 'cursor-pointer hover:bg-blue-50/50 group' : ''}`}
+                >
+                  {isAdmin && emp && (
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <div className="relative flex-shrink-0">
+                          {emp.profilePicture ? (
+                            <img
+                              src={emp.profilePicture}
+                              alt={emp.firstName}
+                              className="w-9 h-9 rounded-xl object-cover border border-slate-100 shadow-sm"
+                              onError={(e) => {
+                                const el = e.target as HTMLImageElement;
+                                el.style.display = 'none';
+                                (el.nextSibling as HTMLElement)?.style && ((el.nextSibling as HTMLElement).style.display = 'flex');
+                              }}
+                            />
+                          ) : null}
+                          <div
+                            className={`w-9 h-9 rounded-xl ${getAvatarColor(emp.id)} text-white flex items-center justify-center text-xs font-bold`}
+                            style={{ display: emp.profilePicture ? 'none' : 'flex' }}
+                          >
+                            {getInitials(emp)}
                           </div>
                         </div>
-                      ) : (
-                        <div className="font-medium text-slate-700">
-                          {formatDate(row.date || rec?.date)}
+                        <div>
+                          <p className="text-sm font-semibold text-slate-800 group-hover:text-blue-700 transition-colors">
+                            {emp.firstName} {emp.lastName}
+                          </p>
+                          <p className="text-xs text-slate-400">{emp.loginId} · {emp.department}</p>
                         </div>
-                      )}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 font-medium text-slate-700">
+                  )}
+                  <td className="px-4 py-3.5">
+                    <span className="text-sm text-slate-600 font-medium">{dateStr ? formatDate(dateStr) : '—'}</span>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <span className={`text-sm font-semibold ${rec?.checkIn ? 'text-emerald-700' : 'text-slate-300'}`}>
                       {formatTime(rec?.checkIn)}
-                    </td>
-                    <td className="px-6 py-4 font-medium text-slate-700">
+                    </span>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <span className={`text-sm font-semibold ${rec?.checkOut ? 'text-slate-700' : 'text-slate-300'}`}>
                       {formatTime(rec?.checkOut)}
-                    </td>
-                    <td className="px-6 py-4 text-slate-600">
-                      {rec?.workHours || '--h --m'}
-                    </td>
-                    <td className="px-6 py-4 text-slate-600">
-                      {rec?.extraHours || '--h --m'}
-                    </td>
-                    <td className="px-6 py-4">
-                      {renderStatus(rec?.status)}
-                    </td>
-                  </tr>
-                );
-              })
-            )}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <span className="text-sm font-semibold text-slate-700">{rec?.workHours || '—'}</span>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <span className={`text-sm font-medium ${rec?.extraHours && rec.extraHours !== '0h 00m' && rec.extraHours !== '00h 00m' ? 'text-violet-600' : 'text-slate-300'}`}>
+                      {rec?.extraHours || '—'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    {rec ? <StatusBadge status={rec.status} /> : <span className="text-slate-300 text-sm">—</span>}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
-      </div>
-      
-      {/* Footer / Pagination Placeholder */}
-      <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between bg-slate-50/50">
-        <span className="text-sm text-slate-500">
-          Showing 1 to {data.length} of {data.length} records
-        </span>
-        <div className="flex items-center gap-1">
-          <button className="p-1 rounded text-slate-400 hover:bg-slate-200 disabled:opacity-50" disabled>
-            &lt;
-          </button>
-          <button className="w-8 h-8 rounded bg-primary-600 text-white font-medium text-sm">
-            1
-          </button>
-          <button className="p-1 rounded text-slate-400 hover:bg-slate-200 disabled:opacity-50" disabled>
-            &gt;
-          </button>
-        </div>
       </div>
     </div>
   );
