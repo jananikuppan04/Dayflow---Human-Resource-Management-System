@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   LayoutDashboard,
   User,
@@ -9,8 +9,13 @@ import {
   FileBarChart,
   Settings,
   ChevronDown,
+  ChevronUp,
   Layers,
+  LogOut,
+  ShieldCheck,
 } from 'lucide-react';
+import { useAuth } from '../../store/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface SidebarProps {
   activeItem?: string;
@@ -25,6 +30,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isOpenMobile = false,
   onCloseMobile,
 }) => {
+  const { logout, user } = useAuth();
+  const navigate = useNavigate();
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close popup menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSignOut = () => {
+    logout();
+    setIsUserMenuOpen(false);
+    onCloseMobile?.();
+    navigate('/login');
+  };
+
   const navItems = [
     { id: 'Dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'My Profile', label: 'My Profile', icon: User },
@@ -37,7 +65,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-[#0F172A] text-slate-300 w-64 border-r border-slate-800 select-none">
+    <div className="flex flex-col h-full bg-[#0F172A] text-slate-300 w-64 border-r border-slate-800 select-none relative">
       {/* Brand Header */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-slate-800/80">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/20 text-white font-bold">
@@ -61,9 +89,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onNavigate?.(item.id);
                 onCloseMobile?.();
               }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 ${
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-150 cursor-pointer ${
                 isActive
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25 font-bold'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
               }`}
             >
@@ -90,18 +118,69 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      {/* User Footer Profile Card */}
-      <div className="p-4 border-t border-slate-800/80 bg-slate-900/60 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-semibold flex items-center justify-center text-sm shadow-sm">
-            JD
+      {/* User Footer Profile Card with Sign Out Popup Menu */}
+      <div className="p-4 border-t border-slate-800/80 bg-slate-900/60 relative" ref={userMenuRef}>
+        <button
+          onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+          className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-slate-800/80 transition-colors cursor-pointer outline-none"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-semibold flex items-center justify-center text-sm shadow-sm ring-2 ring-blue-500/30">
+              JD
+            </div>
+            <div className="overflow-hidden text-left">
+              <div className="text-sm font-semibold text-white truncate">Janani Devi</div>
+              <div className="text-xs text-slate-400 truncate">Software Engineer</div>
+            </div>
           </div>
-          <div className="overflow-hidden text-left">
-            <div className="text-sm font-medium text-white truncate">Janani Devi</div>
-            <div className="text-xs text-slate-400 truncate">Software Engineer</div>
+          {isUserMenuOpen ? (
+            <ChevronUp className="w-4 h-4 text-blue-400" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-slate-400" />
+          )}
+        </button>
+
+        {/* User Popup Menu with Sign Out Option */}
+        {isUserMenuOpen && (
+          <div className="absolute bottom-full left-4 right-4 mb-2 bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 p-2 text-xs space-y-1 animate-in zoom-in-95 duration-150 z-50">
+            <div className="px-3 py-2 border-b border-slate-700/80">
+              <span className="font-bold text-white block truncate">Janani Devi</span>
+              <span className="text-[11px] text-slate-400 block truncate">janani.dev@email.com</span>
+            </div>
+
+            <button
+              onClick={() => {
+                onNavigate?.('My Profile');
+                setIsUserMenuOpen(false);
+              }}
+              className="w-full text-left px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-700/70 hover:text-white transition-colors flex items-center gap-2 cursor-pointer"
+            >
+              <User className="w-4 h-4 text-slate-400" />
+              <span>My Profile</span>
+            </button>
+
+            <button
+              onClick={() => {
+                onNavigate?.('Settings');
+                setIsUserMenuOpen(false);
+              }}
+              className="w-full text-left px-3 py-2 rounded-xl text-slate-300 hover:bg-slate-700/70 hover:text-white transition-colors flex items-center gap-2 cursor-pointer"
+            >
+              <Settings className="w-4 h-4 text-slate-400" />
+              <span>Settings</span>
+            </button>
+
+            <div className="border-t border-slate-700/80 my-1" />
+
+            <button
+              onClick={handleSignOut}
+              className="w-full text-left px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/20 hover:text-rose-300 transition-colors flex items-center gap-2 font-bold cursor-pointer"
+            >
+              <LogOut className="w-4 h-4 text-rose-400" />
+              <span>Sign Out</span>
+            </button>
           </div>
-        </div>
-        <ChevronDown className="w-4 h-4 text-slate-400" />
+        )}
       </div>
     </div>
   );
