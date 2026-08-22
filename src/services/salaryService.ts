@@ -10,12 +10,12 @@ import {
 // Initial default employee profile matching Dayflow design reference
 export const DEFAULT_EMPLOYEE_PROFILE: EmployeeProfile = {
   id: 'emp_1001',
-  employeeId: 'EMP-1001',
+  employeeId: 'OIJODO20220001', // Odoo India formatted John Doe Login ID
   name: 'Janani Devi',
   designation: 'Software Engineer',
   email: 'janani.dev@email.com',
   phone: '+91 98765 43210',
-  company: 'Dayflow Solutions Pvt. Ltd.',
+  company: 'Odoo India',
   department: 'Engineering',
   manager: 'Rohit Sharma',
   location: 'Bangalore, India',
@@ -25,12 +25,12 @@ export const DEFAULT_EMPLOYEE_PROFILE: EmployeeProfile = {
   lastUpdated: '01 Aug 2026',
 };
 
-// Initial component templates based on hand-drawn sketch requirements & reference UI
+// Initial component templates based on Odoo hand-drawn sketch requirements & reference UI
 const DEFAULT_COMPONENT_TEMPLATES: SalaryComponentConfig[] = [
   {
     id: 'comp_basic',
     name: 'Basic Salary',
-    description: 'Basic salary from company cost component based on monthly wages.',
+    description: 'Basic salary component calculated as 50% of gross monthly wage.',
     calcType: 'PERCENTAGE_WAGE',
     value: 50, // 50% of Wage = ₹25,000
     amount: 25000,
@@ -40,7 +40,7 @@ const DEFAULT_COMPONENT_TEMPLATES: SalaryComponentConfig[] = [
   {
     id: 'comp_hra',
     name: 'House Rent Allowance (HRA)',
-    description: 'HRA provided to employees based on configured percentage of basic salary.',
+    description: 'HRA provided to employees based on 50% of basic salary.',
     calcType: 'PERCENTAGE_BASIC',
     value: 50, // 50% of Basic = ₹12,500
     amount: 12500,
@@ -50,31 +50,41 @@ const DEFAULT_COMPONENT_TEMPLATES: SalaryComponentConfig[] = [
   {
     id: 'comp_standard',
     name: 'Standard Allowance',
-    description: 'A standard allowance is a predetermined fixed amount provided to employees as part of salary.',
-    calcType: 'PERCENTAGE_WAGE',
-    value: 16.0, // 16% of Wage = ₹8,000 or fixed allowance
-    amount: 8000,
-    percentageOfWage: 16,
+    description: 'Standard allowance component calculated as 16.67% of basic salary.',
+    calcType: 'PERCENTAGE_BASIC',
+    value: 16.67, // 16.67% of Basic = ₹4,167.50
+    amount: 4167.5,
+    percentageOfWage: 8.33,
     enabled: true,
   },
   {
     id: 'comp_bonus',
     name: 'Performance Bonus',
-    description: 'Variable component defined by company and calculated based on basic salary.',
+    description: 'Bonus component calculated as 8.33% of basic salary.',
     calcType: 'PERCENTAGE_BASIC',
-    value: 10, // 10% of Basic = ₹2,500
-    amount: 2500,
-    percentageOfWage: 5,
+    value: 8.33, // 8.33% of Basic = ₹2,082.50
+    amount: 2082.5,
+    percentageOfWage: 4.17,
     enabled: true,
   },
   {
     id: 'comp_lta',
     name: 'Leave Travel Allowance',
-    description: 'LTA paid by company to employees to cover travel expenses.',
+    description: 'LTA component calculated as 8.33% of basic salary.',
     calcType: 'PERCENTAGE_BASIC',
-    value: 8, // 8% of Basic = ₹2,000
-    amount: 2000,
-    percentageOfWage: 4,
+    value: 8.33, // 8.33% of Basic = ₹2,082.50
+    amount: 2082.5,
+    percentageOfWage: 4.17,
+    enabled: true,
+  },
+  {
+    id: 'comp_fixed',
+    name: 'Fixed Allowance',
+    description: 'Residual allowance portion of wages determined after calculating all other components.',
+    calcType: 'RESIDUAL',
+    value: 11.67, // 11.67% of Basic = ₹2,917.50 (around ₹2,918.00)
+    amount: 2917.5,
+    percentageOfWage: 5.83,
     enabled: true,
   },
 ];
@@ -99,8 +109,8 @@ export const DEFAULT_DEDUCTIONS_CONFIG: DeductionsConfig = {
  */
 export function calculateSalaryStructure(
   monthlyWage: number,
-  componentsConfig: SalaryComponentConfig[],
-  deductionsInput: Partial<DeductionsConfig>,
+  componentsConfig: SalaryComponentConfig[] = DEFAULT_COMPONENT_TEMPLATES,
+  deductionsInput: Partial<DeductionsConfig> = DEFAULT_DEDUCTIONS_CONFIG,
   scheduleInput: Partial<WorkingScheduleConfig> = DEFAULT_WORKING_SCHEDULE
 ): SalaryStructure {
   const safeWage = Math.max(0, monthlyWage);
@@ -117,9 +127,13 @@ export function calculateSalaryStructure(
     }
   }
 
-  // 2. Compute each active component amount
-  let totalExplicitComponents = 0;
-  const recalculatedComponents: SalaryComponentConfig[] = componentsConfig.map((c) => {
+  // 2. Compute explicit non-residual component amounts
+  let sumOfExplicitComponents = 0;
+  const tempComponents = componentsConfig.map((c) => {
+    if (c.calcType === 'RESIDUAL') {
+      return { ...c, amount: 0, percentageOfWage: 0 };
+    }
+
     if (!c.enabled) {
       return { ...c, amount: 0, percentageOfWage: 0 };
     }
@@ -133,9 +147,8 @@ export function calculateSalaryStructure(
       compAmount = c.value;
     }
 
-    // round to 2 decimals
     compAmount = Math.round(compAmount * 100) / 100;
-    totalExplicitComponents += compAmount;
+    sumOfExplicitComponents += compAmount;
 
     const percentageOfWage = safeWage > 0 ? Math.round((compAmount / safeWage) * 10000) / 100 : 0;
 
@@ -146,8 +159,28 @@ export function calculateSalaryStructure(
     };
   });
 
-  // 3. Compute Gross Salary
-  const grossSalary = Math.round(totalExplicitComponents * 100) / 100;
+  // 3. Calculate Fixed Allowance as RESIDUAL (Sketch 3: "Fixed Allowance = Wage - Total of all the other components")
+  const recalculatedComponents = tempComponents.map((c) => {
+    if (c.calcType !== 'RESIDUAL') {
+      return c;
+    }
+
+    let residualAmount = 0;
+    if (c.enabled) {
+      residualAmount = Math.max(0, safeWage - sumOfExplicitComponents);
+    }
+
+    const percentageOfWage = safeWage > 0 ? Math.round((residualAmount / safeWage) * 10000) / 100 : 0;
+
+    return {
+      ...c,
+      amount: Math.round(residualAmount * 100) / 100,
+      percentageOfWage,
+    };
+  });
+
+  // Gross is sum of all enabled components, which should equal safeWage
+  const grossSalary = safeWage;
 
   // 4. Calculate PF & Tax Deductions
   const pfEmpRate = deductionsInput.pfEmployeeRate ?? 12;
@@ -202,7 +235,7 @@ export function validateSalaryComponents(
 
   let total = 0;
   components.forEach((c) => {
-    if (!c.enabled) return;
+    if (!c.enabled || c.calcType === 'RESIDUAL') return;
     if (c.calcType === 'PERCENTAGE_WAGE') {
       total += (monthlyWage * c.value) / 100;
     } else if (c.calcType === 'PERCENTAGE_BASIC') {

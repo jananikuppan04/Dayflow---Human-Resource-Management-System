@@ -23,7 +23,7 @@ interface SalaryInfoPageProps {
 }
 
 export const SalaryInfoPage: React.FC<SalaryInfoPageProps> = ({ currentRole }) => {
-  const [activeTab, setActiveTab] = useState<string>('salary');
+  const [activeTab, setActiveTab] = useState<string>('personal');
   const [employee, setEmployee] = useState<EmployeeProfile | null>(null);
   const [salary, setSalary] = useState<SalaryStructure | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -36,6 +36,13 @@ export const SalaryInfoPage: React.FC<SalaryInfoPageProps> = ({ currentRole }) =
   useEffect(() => {
     loadSalaryData();
   }, []);
+
+  // Reset tab to personal if role switches to employee while viewing salary info
+  useEffect(() => {
+    if (currentRole !== 'ADMIN' && activeTab === 'salary') {
+      setActiveTab('personal');
+    }
+  }, [currentRole, activeTab]);
 
   const loadSalaryData = async () => {
     setLoading(true);
@@ -101,7 +108,7 @@ export const SalaryInfoPage: React.FC<SalaryInfoPageProps> = ({ currentRole }) =
       <ProfileHeader employee={employee} />
 
       {/* 2. Profile Tabs (Personal, Private, Salary, Documents) */}
-      <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
+      <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} currentRole={currentRole} />
 
       {/* Render selected tab content */}
       {activeTab === 'personal' && <PersonalInfoTab />}

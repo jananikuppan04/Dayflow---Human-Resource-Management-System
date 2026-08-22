@@ -14,6 +14,8 @@ export interface Employee {
   lastName: string;
   email: string;
   mobile: string;
+  phone?: string;
+  role?: Role;
   department: string;
   designation: string; // Job title
   company: string;

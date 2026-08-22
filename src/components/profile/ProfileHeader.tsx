@@ -18,7 +18,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ employee }) => {
               JD
             </div>
             <button
-              className="absolute bottom-0 right-0 p-1.5 bg-white rounded-full shadow-md border border-slate-200 text-slate-600 hover:text-blue-600 transition-colors"
+              className="absolute bottom-0 right-0 p-1.5 bg-white rounded-full shadow-md border border-slate-200 text-slate-600 hover:text-[#714B67] transition-colors"
               title="Change Profile Picture"
             >
               <Camera className="w-4 h-4" />
@@ -29,7 +29,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ employee }) => {
           <div className="space-y-1.5">
             <div className="flex items-center gap-3 flex-wrap">
               <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{employee.name}</h2>
-              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-600 border border-blue-100">
+              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-purple-50 text-[#714B67] border border-purple-100">
                 {employee.designation}
               </span>
             </div>
@@ -41,7 +41,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ employee }) => {
               </div>
               <div className="flex items-center gap-1.5">
                 <Mail className="w-3.5 h-3.5 text-slate-400" />
-                <a href={`mailto:${employee.email}`} className="hover:text-blue-600 transition-colors">
+                <a href={`mailto:${employee.email}`} className="hover:text-[#714B67] transition-colors">
                   {employee.email}
                 </a>
               </div>
