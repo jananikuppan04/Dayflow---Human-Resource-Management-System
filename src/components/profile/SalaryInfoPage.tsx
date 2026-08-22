@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Shield, Lock, AlertCircle, RefreshCw } from 'lucide-react';
+import { Settings, Lock, AlertCircle, RefreshCw } from 'lucide-react';
 import { UserRole, SalaryStructure, EmployeeProfile } from '../../types/salaryTypes';
 import { salaryService } from '../../services/salaryService';
 
@@ -13,6 +13,10 @@ import { AdditionalInfoCard } from './AdditionalInfoCard';
 import { SalaryHelpBanner } from './SalaryHelpBanner';
 import { SalaryConfigModal } from './SalaryConfigModal';
 import { UnauthorizedState } from './UnauthorizedState';
+
+import { PersonalInfoTab } from './PersonalInfoTab';
+import { PrivateInfoTab } from './PrivateInfoTab';
+import { DocumentsTab } from './DocumentsTab';
 
 interface SalaryInfoPageProps {
   currentRole: UserRole;
@@ -70,7 +74,7 @@ export const SalaryInfoPage: React.FC<SalaryInfoPageProps> = ({ currentRole }) =
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
         <RefreshCw className="w-8 h-8 text-blue-600 animate-spin" />
-        <span className="text-xs font-semibold text-slate-500">Loading salary information...</span>
+        <span className="text-xs font-semibold text-slate-500">Loading profile information...</span>
       </div>
     );
   }
@@ -100,7 +104,11 @@ export const SalaryInfoPage: React.FC<SalaryInfoPageProps> = ({ currentRole }) =
       <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Render selected tab content */}
-      {activeTab === 'salary' ? (
+      {activeTab === 'personal' && <PersonalInfoTab />}
+      {activeTab === 'private' && <PrivateInfoTab />}
+      {activeTab === 'documents' && <DocumentsTab />}
+
+      {activeTab === 'salary' && (
         <div className="space-y-6 animate-in fade-in duration-150">
           {/* Permission restriction warning banner if non-admin attempted edit */}
           {showPermissionAlert && (
@@ -166,21 +174,6 @@ export const SalaryInfoPage: React.FC<SalaryInfoPageProps> = ({ currentRole }) =
             salaryData={salary}
             onSave={handleSaveSalary}
           />
-        </div>
-      ) : (
-        /* Placeholder view for other profile tabs */
-        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-500">
-          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3 text-slate-400">
-            <Shield className="w-6 h-6" />
-          </div>
-          <h3 className="text-base font-bold text-slate-800 capitalize">{activeTab} Information</h3>
-          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-            This module is being maintained on another developer's Git feature branch. Click back to{' '}
-            <strong className="text-blue-600 cursor-pointer" onClick={() => setActiveTab('salary')}>
-              Salary Info
-            </strong>{' '}
-            to view your feature.
-          </p>
         </div>
       )}
     </div>
