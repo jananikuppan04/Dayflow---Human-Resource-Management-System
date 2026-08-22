@@ -1,5 +1,5 @@
 import React from 'react';
-import { Employee } from '../../types';
+import type { Employee } from '../../types';
 import { Building2, Plane } from 'lucide-react';
 import { clsx } from 'clsx';
 

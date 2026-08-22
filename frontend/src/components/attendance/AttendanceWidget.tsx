@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../store/AuthContext';
 import { mockApi } from '../../services/mockApi';
-import { AttendanceRecord } from '../../types';
+import type { AttendanceRecord } from '../../types';
 import { Clock, CheckCircle2, LogOut, Loader2, AlertCircle } from 'lucide-react';
 
 export const AttendanceWidget = () => {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../store/AuthContext';
 import { mockApi } from '../services/mockApi';
-import { Employee } from '../types';
+import type { Employee } from '../types';
 import { EmployeeCard } from '../components/employee/EmployeeCard';
 import { EmployeeModal } from '../components/employee/EmployeeModal';
 import { AttendanceWidget } from '../components/attendance/AttendanceWidget';

@@ -1,4 +1,4 @@
-import { Employee, AttendanceRecord, TimeOffRecord, User } from '../types';
+import type { Employee, AttendanceRecord, TimeOffRecord, User } from '../types';
 
 // TEMPORARY: Isolated mock data
 const mockEmployees: Employee[] = [

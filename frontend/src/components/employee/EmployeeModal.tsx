@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Employee } from '../../types';
+import type { Employee } from '../../types';
 import { X, Mail, Phone, MapPin, Building2, UserCircle } from 'lucide-react';
 
 interface EmployeeModalProps {
