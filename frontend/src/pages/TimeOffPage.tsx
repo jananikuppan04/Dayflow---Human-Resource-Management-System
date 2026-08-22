@@ -12,6 +12,7 @@ export const TimeOffPage = () => {
   const { user } = useAuth();
   const [requests, setRequests] = useState<TimeOffRecord[]>([]);
   const [balance, setBalance] = useState<LeaveBalance | null>(null);
+  const [holidays, setHolidays] = useState<{date: string, name: string}[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewModal, setShowNewModal] = useState(false);
 
@@ -26,13 +27,15 @@ export const TimeOffPage = () => {
         const reqs = await mockApi.getTimeOffRequests();
         setRequests(reqs);
       } else {
-        // Employee sees own requests and balance
-        const [reqs, bal] = await Promise.all([
+        // Employee sees own requests, balance, and holidays
+        const [reqs, bal, hols] = await Promise.all([
           mockApi.getTimeOffRequests(user.employeeId),
-          mockApi.getLeaveBalance(user.employeeId)
+          mockApi.getLeaveBalance(user.employeeId),
+          mockApi.getPublicHolidays()
         ]);
         setRequests(reqs);
         setBalance(bal);
+        setHolidays(hols);
       }
     } catch (error) {
       console.error("Failed to load time off data:", error);
@@ -48,12 +51,12 @@ export const TimeOffPage = () => {
   if (!user) return null;
 
   return (
-    <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto bg-slate-50 min-h-[calc(100vh-64px)]">
+    <div className="py-6 px-4 sm:px-6 lg:px-8 max-w-[1100px] mx-auto bg-slate-50 min-h-[calc(100vh-64px)]">
       
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Time Off</h1>
-          <p className="text-slate-500 mt-1 font-medium">
+          <h1 className="text-[22px] font-semibold text-slate-900 tracking-tight">Time Off</h1>
+          <p className="text-[13px] text-slate-500 mt-0.5">
             {isAdmin ? 'Manage employee time off requests and allocations.' : 'View your leave balances and submit time off requests.'}
           </p>
         </div>
@@ -61,9 +64,9 @@ export const TimeOffPage = () => {
         {!isAdmin && (
           <button 
             onClick={() => setShowNewModal(true)}
-            className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shadow-sm shadow-primary-500/20 active:scale-[0.98]"
+            className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-1.5 transition-all shadow-sm shadow-primary-500/10 active:scale-[0.98]"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-4 h-4" />
             New Time Off
           </button>
         )}
@@ -76,7 +79,7 @@ export const TimeOffPage = () => {
       ) : (
         <>
           {!isAdmin && balance && <TimeOffBalance balance={balance} />}
-          {!isAdmin && <TimeOffCalendar requests={requests} />}
+          {!isAdmin && <TimeOffCalendar requests={requests} holidays={holidays} />}
           <TimeOffList 
             requests={requests} 
             user={user} 
