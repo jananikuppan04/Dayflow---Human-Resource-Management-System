@@ -19,7 +19,7 @@ const mockAdminUser: User = {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(mockAdminUser);
+  const [user, setUser] = useState<User | null>(null);
 
   const login = (userData: User) => {
     setUser(userData);

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
-import { AuthProvider } from './store/AuthContext';
+import { AuthProvider, useAuth } from './store/AuthContext';
 import { Sidebar } from './components/layout/Sidebar';
 import { Navbar } from './components/layout/Navbar';
 import { SalaryInfoPage } from './components/profile/SalaryInfoPage';
@@ -16,7 +16,9 @@ import { SettingsPage } from './pages/SettingsPage';
 import { UserRole } from './types/salaryTypes';
 
 function MainAppLayout() {
-  const [currentRole, setCurrentRole] = useState<UserRole>('ADMIN');
+  const { user } = useAuth();
+  // Derive currentRole from the authenticated user — no more hardcoded 'ADMIN'
+  const currentRole: UserRole = user?.role === 'admin' ? 'ADMIN' : 'EMPLOYEE';
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -50,6 +52,11 @@ function MainAppLayout() {
     navigate(routeMap[item] || '/dashboard');
   };
 
+  // Auth guard: redirect to login if not authenticated
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
   return (
     <div className="flex min-h-screen bg-[#F8FAFC]">
       {/* Navigation Sidebar */}
@@ -65,7 +72,6 @@ function MainAppLayout() {
         {/* Top Navbar Header */}
         <Navbar
           currentRole={currentRole}
-          onRoleToggle={setCurrentRole}
           onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
         />
 
