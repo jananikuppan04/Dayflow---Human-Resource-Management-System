@@ -31,6 +31,8 @@ export interface AttendanceRecord {
   checkIn: string | null; // ISO string
   checkOut: string | null; // ISO string
   status: AttendanceStatus;
+  workHours?: string;
+  extraHours?: string;
 }
 
 export interface TimeOffRecord {

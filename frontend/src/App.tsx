@@ -11,11 +11,7 @@ const DashboardPlaceholder = () => (
   </div>
 );
 
-const AttendancePlaceholder = () => (
-  <div className="flex justify-center items-center h-64 text-slate-500 bg-white rounded-xl shadow-sm">
-    <h2 className="text-xl">Attendance Module (Coming Soon)</h2>
-  </div>
-);
+import { AttendancePage } from './pages/AttendancePage';
 
 const TimeOffPlaceholder = () => (
   <div className="flex justify-center items-center h-64 text-slate-500 bg-white rounded-xl shadow-sm">
@@ -66,7 +62,7 @@ function App() {
             <Route index element={<Navigate to="/employees" replace />} />
             <Route path="dashboard" element={<DashboardPlaceholder />} />
             <Route path="employees" element={<EmployeesPage />} />
-            <Route path="attendance" element={<AttendancePlaceholder />} />
+            <Route path="attendance" element={<AttendancePage />} />
             <Route path="time-off" element={<TimeOffPlaceholder />} />
             <Route path="profile" element={<ProfilePlaceholder />} />
           </Route>

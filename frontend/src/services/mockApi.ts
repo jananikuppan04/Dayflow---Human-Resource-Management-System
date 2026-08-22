@@ -82,6 +82,8 @@ let mockAttendanceRecords: AttendanceRecord[] = [
     checkIn: twoHoursAgo.toISOString(),
     checkOut: null,
     status: 'present',
+    workHours: '02h 00m',
+    extraHours: '00h 00m'
   },
   {
     id: 'a4',
@@ -90,6 +92,29 @@ let mockAttendanceRecords: AttendanceRecord[] = [
     checkIn: twoHoursAgo.toISOString(),
     checkOut: null,
     status: 'present',
+    workHours: '02h 00m',
+    extraHours: '00h 00m'
+  },
+  // Historical data for testing Employee view (assuming today is in October 2025 like the wireframe, but using dynamic relative dates)
+  {
+    id: 'a5',
+    employeeId: 'e1',
+    date: new Date(Date.now() - 86400000).toISOString().split('T')[0], // Yesterday
+    checkIn: new Date(Date.now() - 86400000).setHours(10, 0, 0, 0).toString(),
+    checkOut: new Date(Date.now() - 86400000).setHours(19, 0, 0, 0).toString(),
+    status: 'present',
+    workHours: '09h 00m',
+    extraHours: '01h 00m'
+  },
+  {
+    id: 'a6',
+    employeeId: 'e1',
+    date: new Date(Date.now() - 86400000 * 2).toISOString().split('T')[0], // Day before yesterday
+    checkIn: new Date(Date.now() - 86400000 * 2).setHours(10, 5, 0, 0).toString(),
+    checkOut: new Date(Date.now() - 86400000 * 2).setHours(19, 10, 0, 0).toString(),
+    status: 'present',
+    workHours: '09h 05m',
+    extraHours: '01h 05m'
   }
 ];
 
@@ -141,6 +166,79 @@ export const mockApi = {
         const today = new Date().toISOString().split('T')[0];
         const record = mockAttendanceRecords.find(a => a.employeeId === employeeId && a.date === today);
         resolve(record || null);
+      }, 500);
+    });
+  },
+
+  // REQUIRES BACKEND: Replace with GET /api/attendance/daily?date=YYYY-MM-DD
+  getDailyAttendanceList: async (date: string) => {
+    return new Promise<{record: AttendanceRecord | null, employee: Employee}[]>((resolve) => {
+      setTimeout(() => {
+        const results = mockEmployees.map(emp => {
+          const record = mockAttendanceRecords.find(a => a.employeeId === emp.id && a.date === date);
+          
+          let effectiveRecord = record || null;
+          
+          // If no record, check if they are on leave
+          if (!effectiveRecord) {
+            const hasLeave = mockTimeOffs.some(
+              t => t.employeeId === emp.id && t.status === 'approved' && t.startDate <= date && t.endDate >= date
+            );
+            if (hasLeave) {
+              effectiveRecord = {
+                id: `mock-leave-${emp.id}`,
+                employeeId: emp.id,
+                date: date,
+                checkIn: null,
+                checkOut: null,
+                status: 'leave'
+              };
+            } else {
+               // Default to absent if past or today
+               const isPastOrToday = date <= new Date().toISOString().split('T')[0];
+               if (isPastOrToday) {
+                 effectiveRecord = {
+                   id: `mock-absent-${emp.id}`,
+                   employeeId: emp.id,
+                   date: date,
+                   checkIn: null,
+                   checkOut: null,
+                   status: 'absent'
+                 };
+               }
+            }
+          }
+          
+          return {
+            employee: emp,
+            record: effectiveRecord
+          };
+        });
+        resolve(results);
+      }, 500);
+    });
+  },
+
+  // REQUIRES BACKEND: Replace with GET /api/attendance/history?employeeId=X&month=YYYY-MM
+  getEmployeeAttendanceHistory: async (employeeId: string, monthPrefix: string) => {
+    return new Promise<{ records: AttendanceRecord[], stats: { present: number, leaves: number, total: number } }>((resolve) => {
+      setTimeout(() => {
+        const records = mockAttendanceRecords.filter(a => a.employeeId === employeeId && a.date.startsWith(monthPrefix));
+        
+        // Sort descending by date
+        records.sort((a, b) => b.date.localeCompare(a.date));
+
+        const leaves = mockTimeOffs.filter(t => t.employeeId === employeeId && t.status === 'approved' && t.startDate.startsWith(monthPrefix)).length;
+        const present = records.filter(r => r.status === 'present').length;
+        
+        resolve({
+          records,
+          stats: {
+            present,
+            leaves,
+            total: present + leaves
+          }
+        });
       }, 500);
     });
   },
